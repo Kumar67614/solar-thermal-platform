@@ -315,17 +315,16 @@ with tabs[5]:
     st.header("System Integration & Requirements")
     st.info(f"Detailed integration specifications for **{industry}** industry applications.")
     
-    # 1. Fetch the completely redesigned premium HTML string
-    rec_html = recommendations(
+    # 1. Fetch the newly overhauled premium graphical proposal code layout
+    proposal_view = recommendations(
         industry=industry,
         tout=tout,
         daily_water=daily_water,
         total_flow=total_flow
     )
 
-    # 2. Render the responsive HTML component directly onto the page layout
-    st.html(rec_html)# =====================================================
-# INSTALLATION TAB
+    # 2. Call the native HTML view layer to display the UI cards grid directly
+    st.html(proposal_view)# INSTALLATION TAB
 # =====================================================
 
 with tabs[6]:
