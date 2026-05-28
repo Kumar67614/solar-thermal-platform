@@ -297,37 +297,102 @@ with tabs[0]:
     )
 
 # =====================================================
-# THERMAL TAB
+# =====================================================
+# THERMAL TAB (UPDATED FOR COMMERCIAL PROPOSALS)
 # =====================================================
 
 with tabs[1]:
+    st.header("Advanced Thermal Analysis & Proposal Metrics")
+    st.markdown("---")
 
-    st.header("Thermal Analysis")
+    # 1. Run the expert proposal analytics simulation engine
+    daily_plant_load, monthly_analytics_list = generate_proposal_analytics(
+        lpd=daily_water,
+        tin=tin,
+        tout=tout,
+        latitude=latitude,
+        eta0=eta0,
+        a1=a1,
+        a2=a2,
+        aperture_area=aperture_area
+    )
+    
+    # Convert simulation list to an easy-to-read DataFrame for calculations
+    df_analytics = pd.DataFrame(monthly_analytics_list)
 
-    st.write(f"Collector Efficiency = {eta*100:.2f} %")
+    # 2. Executive Pitch Summary Indicators (C-Suite Value Metrics)
+    st.subheader("Annualized Projected Savings Summary")
+    summary_col1, summary_col2, summary_col3 = st.columns(3)
+    
+    total_annual_fuel_saved = df_analytics["Fuel Saved (Liters/month)"].sum()
+    total_annual_co2_saved = df_analytics["CO2 Mitigated (kg/month)"].sum()
+    average_solar_fraction = df_analytics["Solar Fraction (%)"].mean()
 
-    fig1 = efficiency_plot(
-        eta0,
-        a1,
-        a2,
-        irradiance
+    summary_col1.metric(
+        label="🔥 Total Fuel Displaced Annually",
+        value=f"{total_annual_fuel_saved:,.0f} Liters / Year"
+    )
+    summary_col2.metric(
+        label="🌱 Carbon Footprint Reduction",
+        value=f"{(total_annual_co2_saved / 1000):,.1f} Metric Tons CO2"
+    )
+    summary_col3.metric(
+        label="☀️ Average Solar Fraction",
+        value=f"{average_solar_fraction:.1f} % Contribution"
+    )
+    
+    st.markdown("---")
+
+    # 3. Interactive Proposal Data Matrix (Visible Verification for Engineering Teams)
+    st.subheader("Seasonal Performance Matrix (Month-by-Month Simulation)")
+    st.dataframe(
+        df_analytics,
+        column_config={
+            "Month": "Operational Month",
+            "Efficiency (%)": st.column_config.NumberColumn("Avg Efficiency", format="%d%%"),
+            "Collector Yield (kWh/day)": st.column_config.NumberColumn("Daily Energy Yield", format="%.1f kWh"),
+            "Solar Fraction (%)": st.column_config.NumberColumn("Boiler Offset", format="%.1f%%"),
+            "Fuel Saved (Liters/month)": st.column_config.NumberColumn("Fuel Saved", format="%d L"),
+            "CO2 Mitigated (kg/month)": st.column_config.NumberColumn("CO2 Saved", format="%d kg"),
+        },
+        hide_index=True,
+        use_container_width=True
     )
 
-    st.plotly_chart(
-        fig1,
-        width='stretch',
-        key='thermal_efficiency'
-    )
+    st.markdown("---")
 
-    fig2 = monthly_yield_plot()
+    # 4. Graphical Proposal Visualization Blocks
+    st.subheader("Engineering Performance Curves")
+    chart_col1, chart_col2 = st.columns(2)
 
-    st.plotly_chart(
-        fig2,
-        width='stretch',
-        key='thermal_monthly_yield'
-    )
+    with chart_col1:
+        st.markdown("**Collector Thermal Efficiency Profile**")
+        # Plots efficiency drop relative to fluid temperature rise
+        fig_efficiency = efficiency_plot(
+            eta0,
+            a1,
+            a2,
+            irradiance
+        )
+        st.plotly_chart(
+            fig_efficiency,
+            use_container_width=True,
+            key='proposal_efficiency_curve'
+        )
 
-# =====================================================
+    with chart_col2:
+        st.markdown("**Diurnal Energy Generation Profile (Clear vs. Cloudy)**")
+        # Simulates 24-hour heat collection cycle using the new engine function
+        hourly_data = simulate_diurnal_curve(tin, tout, ambient, irradiance)
+        df_hourly = pd.DataFrame(hourly_data)
+        
+        # Use simple Streamlit area charts to show daily peak matching performance instantly
+        st.area_chart(
+            df_hourly, 
+            x="Hour", 
+            y="Instantaneous Output (W/m²)", 
+            color="#0284c7"
+        )# =====================================================
 # LAYOUT TAB
 # =====================================================
 
