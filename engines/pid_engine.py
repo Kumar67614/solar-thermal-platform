@@ -1,140 +1,154 @@
 def generate_pid(industry="Dairy", collectors=5, tout=80, daily_water=5000, total_flow=250):
     """
-    Generate a detailed P&ID (Piping and Instrumentation Diagram) 
-    based on system parameters and industry requirements.
-    
-    Uses graphviz with ISA standard symbols.
+    Generate a standard-compliant, human-readable P&ID diagram.
+    Uses Graphviz with true ISA circular instrument bubbles and directional fluid routing.
     """
     
-    # Determine system configuration based on parameters
-    has_backup = tout > 60  # Add backup boiler for high temps
+    # Process Flags
+    has_backup = tout > 60
     has_cip = industry == "Dairy"
     has_buffer = industry == "Textile"
     has_process_control = industry in ["Pharmaceutical", "Chemical", "Food"]
     
+    # Target tank variable mapping
+    tank_id = "TB" if has_buffer else "TANK"
+    tank_label = "Thermal Buffer Tank" if has_buffer else "Insulated Storage Tank"
+
     pid = f"""
-digraph SystemPID {{
-    rankdir=LR;
-    splines=curved;
-    bgcolor=white;
-    
-    /* Node attributes */
-    node [fontname="Arial", fontsize=10];
-    
-    /* ========== SOLAR FIELD SECTION ========== */
-    
-    SC [label="Solar Collectors\\n({collectors} units)", shape=box, style=filled, fillcolor=lightyellow];
-    
-    PT1 [label="PT\\n(Pressure)", shape=diamond, height=0.5, width=0.5];
-    TT1 [label="TT\\n(Temp)", shape=diamond, height=0.5, width=0.5];
-    
-    SC -> PT1;
-    SC -> TT1;
-    
-    /* ========== PUMP SECTION ========== */
-    
-    CVin [label="CHV\\n(Check Valve)", shape=box, height=0.4, width=0.8];
-    PSV [label="PSV\\n(Relief Valve)", shape=box, height=0.4, width=0.8];
-    
-    PT1 -> CVin;
-    CVin -> PSV;
-    
-    PUMP [label="Primary Pump\\n(Main Circulation)", shape=circle, height=0.8];
-    PSV -> PUMP;
-    
-    /* ========== HEAT EXCHANGER SECTION ========== */
-    
-    HX [label="Plate HX\\n(Solar-to-Storage)", shape=box, style=filled, fillcolor=lightblue];
-    
-    PUMP -> HX;
-    
-    TT2 [label="TT\\n(Outlet)", shape=diamond, height=0.5, width=0.5];
-    HX -> TT2;
-    
-    CVout [label="CHV\\n(Check Valve)", shape=box, height=0.4, width=0.8];
-    TT2 -> CVout;
-    
-    /* ========== THERMAL STORAGE ========== """
-    
-    if has_buffer:
-        pid += f"""
-    TB [label="Thermal Buffer\\n(Hot Water Tank)", shape=cylinder, height=1.2, width=0.8, style=filled, fillcolor=lightcyan];
-    CVout -> TB;
-    """
-    else:
-        pid += f"""
-    TANK [label="Storage Tank\\n(Insulated)", shape=cylinder, height=1.2, width=0.8, style=filled, fillcolor=lightcyan];
-    CVout -> TANK;
-    """
-    
+    digraph IndustrialSolarPID {{
+        rankdir=LR;
+        splines=true;
+        nodesep=0.4;
+        ranksep=0.7;
+        bgcolor=white;
+        
+        # Global Node Styles (ISA Standard)
+        node [fontname="Arial", fontsize=10, shape=box, style=filled, fillcolor=white];
+        edge [fontname="Arial", fontsize=9, labelfontcolor="darkblue"];
+        
+        # =====================================================
+        # MAIN EQUIPMENT (Physical Assets)
+        # =====================================================
+        
+        SC     [label="SOLAR FIELD\\nSolar Collectors\\n({collectors} Units)", fillcolor="#FFFDE7", penwidth=2];
+        PUMP   [label="PRIMARY PUMP\\n(Solar Loop)", shape=circle, fixedsize=true, width=0.9, fillcolor="#ECEFF1"];
+        HX     [label="PLATE HEAT EXCHANGER\\n(Solar-to-Storage)", fillcolor="#E3F2FD", penwidth=2];
+        {tank_id}   [label="{tank_label}\\n({daily_water} LPD Capacity)", shape=cylinder, width=1.2, height=1.5, fillcolor="#E0F7FA", penwidth=2];
+        
+        # =====================================================
+        # ISA STANDARD INSTRUMENTATION BUBBLES (Circular Transmitters)
+        # =====================================================
+        node [shape=circle, fixedsize=true, width=0.4, height=0.4, fillcolor="#FFFFFF", style=filled, fontsize=8];
+        
+        # Loop Transmitters
+        TT_field [label="TT\\n101"];
+        PT_field [label="PT\\n101"];
+        TT_hx    [label="TT\\n102"];
+        
+        # Storage Transmitters
+        TT_tank  [label="TT\\n103"];
+        LT_tank  [label="LT\\n101"]; # Level transmitter for a real tank
+        
+        # =====================================================
+        # VALVES AND INLINE COMPONENTS
+        # =====================================================
+        node [shape=box, fixedsize=false, width=0.6, height=0.3, fontsize=8, fillcolor="#F5F5F5"];
+        
+        CV_in  [label="Check\\nValve"];
+        PSV    [label="Safety\\nValve (PSV)"];
+        EV     [label="Expansion\\nTank"];
+        
+        # =====================================================
+        # LIQUID FLOW PIPING PATHWAYS (Left to Right)
+        # =====================================================
+        
+        # 1. Primary Closed Loop (Solar Collector Circuit)
+        SC -> PT_field [color="#D32F2F", penwidth=2, label=" Hot Fluid"];
+        PT_field -> TT_field [color="#D32F2F", penwidth=2];
+        TT_field -> HX [color="#D32F2F", penwidth=2];
+        
+        # Cold return line back to array
+        HX -> PUMP [color="#1976D2", penwidth=2, label=" Cooled Return"];
+        PUMP -> CV_in [color="#1976D2", penwidth=2];
+        CV_in -> PSV [color="#1976D2", penwidth=2];
+        PSV -> SC [color="#1976D2", penwidth=2];
+        
+        # Hook up the Expansion Tank to cold line safety
+        PSV -> EV [style=dashed, color=gray, arrowhead=none];
+        
+        # 2. Charging the Storage Tank System
+        HX -> TT_hx [color="#E65100", penwidth=2, label=" Charged Heat"];
+        TT_hx -> {tank_id} [color="#E65100", penwidth=2];
+        
+        # Attach Instrument indicators directly to the Tank body
+        {tank_id} -> TT_tank [style=dotted, arrowhead=none];
+        {tank_id} -> LT_tank [style=dotted, arrowhead=none];
+        
+        # =====================================================
+        # BACKUP SYSTEMS SECTION
+        # =====================================================
+        """
+        
     if has_backup:
         pid += f"""
-    /* ========== BACKUP BOILER SECTION ========== */
-    
-    BOILER [label="Backup Boiler\\n(for T < {tout}°C)", shape=box, style=filled, fillcolor=lightcoral];
-    BV [label="BV\\n(Block Valve)", shape=box, height=0.4, width=0.8];
-    BOILER -> BV;
-    
-    HX2 [label="Booster HX", shape=box, style=filled, fillcolor=lightcoral];
-    BV -> HX2;
-    
-    {"TB" if has_buffer else "TANK"} -> HX2;
-    """
-    
+        node [shape=box, fontname="Arial", fontsize=10, style=filled];
+        BOILER [label="BACKUP BOILER\\n(Activates below {tout}°C)", fillcolor="#FFEBEE", penwidth=1.5];
+        BV     [label="Modulating\\nControl Valve", shape=box, fontsize=8, fillcolor="#F5F5F5"];
+        
+        {tank_id} -> BOILER [color="#D32F2F", penwidth=1.5, style=dashed, label=" Low Temp Loop"];
+        BOILER -> BV [color="#D32F2F", penwidth=1.5];
+        BV -> {tank_id} [color="#D32F2F", penwidth=1.5];
+        """
+        
     pid += f"""
-    /* ========== PROCESS/OUTPUT SECTION ========== """
-    
+        # =====================================================
+        # PROCESS & END USER DELIVERY LOOP
+        # =====================================================
+        """
+        
     if has_cip:
         pid += f"""
-    /* Dairy CIP Integration */
-    PROCESS [label="CIP System\\n(Process Integration)", shape=box, style=filled, fillcolor=lightgreen];
-    CIPpump [label="CIP Pump", shape=circle, height=0.6];
-    {"TB" if has_buffer else "TANK"} -> CIPpump;
-    CIPpump -> PROCESS;
-    """
+        node [shape=box, fontname="Arial", fontsize=10, style=filled];
+        PROCESS [label="CLEAN-IN-PLACE (CIP) SYSTEM\\n{industry} Industry Automation", fillcolor="#E8F5E9", penwidth=2];
+        CIPpump [label="CIP DELIVERY\\nPUMP", shape=circle, fixedsize=true, width=0.8, fillcolor="#ECEFF1"];
+        
+        {tank_id} -> CIPpump [color="#D32F2F", penwidth=2, label=" Process Supply"];
+        CIPpump -> PROCESS [color="#D32F2F", penwidth=2];
+        """
     elif has_process_control:
         pid += f"""
-    /* Process Control Integration */
-    PROCESS [label="Process Heat Exchanger\\n(Pharmaceutical/Chemical)", shape=box, style=filled, fillcolor=lightgreen];
-    FC [label="FC\\n(Flow Control)", shape=box, height=0.4, width=0.8];
-    {"TB" if has_buffer else "TANK"} -> FC;
-    FC -> PROCESS;
-    """
+        node [shape=box, fontname="Arial", fontsize=10, style=filled];
+        PROCESS [label="PROCESS HEAT EXCHANGER\\nProduction Floor Integration", fillcolor="#E8F5E9", penwidth=2];
+        FC      [label="Automated Flow\\nController (FC)", shape=box, fontsize=8, fillcolor="#F5F5F5"];
+        
+        {tank_id} -> FC [color="#D32F2F", penwidth=2, label=" Regulated Supply"];
+        FC -> PROCESS [color="#D32F2F", penwidth=2];
+        """
     else:
         pid += f"""
-    /* Standard Process */
-    PROCESS [label="Process Application\\n(Hot Water Supply)", shape=box, style=filled, fillcolor=lightgreen];
-    {"TB" if has_buffer else "TANK"} -> PROCESS;
-    """
-    
+        node [shape=box, fontname="Arial", fontsize=10, style=filled];
+        PROCESS [label="HOT WATER DISTRIBUTION\\nGeneral Plant Utilities", fillcolor="#E8F5E9", penwidth=2];
+        
+        {tank_id} -> PROCESS [color="#D32F2F", penwidth=2, label=" Hot Water Draw"];
+        """
+        
     pid += f"""
-    /* ========== EXPANSION & SAFETY ========== */
-    
-    EV [label="EV\\n(Expansion Tank)", shape=box, height=0.4, width=0.8];
-    TEMP [label="TT\\n(System Temp)", shape=diamond, height=0.5, width=0.5];
-    
-    {"TB" if has_buffer else "TANK"} -> EV;
-    {"TB" if has_buffer else "TANK"} -> TEMP;
-    
-    /* ========== LEGEND ========== */
-    
-    subgraph Legend {{
-        label="ISA Symbols";
-        PT [label="PT = Pressure Transmitter"];
-        TT [label="TT = Temperature Transmitter"];
-        FC [label="FC = Flow Controller"];
-        CHV [label="CHV = Check Valve"];
-        PSV [label="PSV = Pressure Safety Valve"];
-        BV [label="BV = Block Valve"];
+        # =====================================================
+        # LEGEND SUBGRAPH (Keeps diagram plain English)
+        # =====================================================
+        subgraph cluster_legend {{
+            label="Diagram Key & ISA Legend";
+            fontname="Arial Bold";
+            fontsize=11;
+            color=gray;
+            style=dashed;
+            
+            leg_tt [label="TT = Temperature Transmitter Bubble", shape=circle, width=0.4, fontsize=7];
+            leg_pt [label="PT = Pressure Transmitter Bubble", shape=circle, width=0.4, fontsize=7];
+            leg_lt [label="LT = Tank Level Indicator", shape=circle, width=0.4, fontsize=7];
+            leg_red [label="Hot Water Fluid Pipe Path", shape=line, color="#D32F2F", penwidth=2];
+            leg_blue [label="Cold Return Water Fluid Path", shape=line, color="#1976D2", penwidth=2];
+        }}
     }}
-    
-    /* Layout adjustments */
-    {{ rank=same SC PT1 TT1 }}
-    {{ rank=same PUMP PSV CVin }}
-    {{ rank=same HX TT2 CVout }}
-    {{ rank=same {"TB" if has_buffer else "TANK"} EV TEMP }}
-    
-}}
-"""
-    
+    """
     return pid
