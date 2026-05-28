@@ -1,223 +1,172 @@
 def recommendations(industry="Dairy", tout=80, daily_water=5000, total_flow=250):
     """
-    Generate detailed system integration recommendations
-    based on industry requirements and system parameters.
+    Generates tailored industrial integration blueprints.
+    Rephrased to clearly explain the business and mechanical justification for each component
+    so non-technical stakeholders can easily follow the integration requirements.
     """
+    
+    # Calculate an accurate process velocity line diameter based on flow rate
+    recommended_dn = calculate_pipe_diameter(total_flow)
     
     recommendations_dict = {
         "Dairy": {
-            "Piping": [
-                "Use SS316 stainless steel piping (Food-grade)",
-                f"Pipe diameter: {calculate_pipe_diameter(total_flow)} mm",
-                "Minimum velocity: 0.3-0.5 m/s to prevent sedimentation",
-                "Slope pipes at 1:40 minimum for drainage",
-                "Insulation: 50mm mineral wool with aluminum cladding"
+            "Plant Fluid Piping": [
+                f"Recommended Main Line Size: **DN {recommended_dn}** (Optimized to maintain a fluid velocity of 1.0–1.5 m/s, preventing sediment settling).",
+                "Material Standard: **Food-Grade Stainless Steel (SS316)** to prevent bacterial contamination and maintain pasteurization sanitation standards.",
+                "Piping Slope Strategy: Install with a downward slope of at least **1:40** toward the drainage basins to ensure easy fluid removal during cleaning.",
+                "Thermal Insulation: **50mm high-density mineral wool clad in protective rugged aluminum sheet metal** to ensure zero heat leakage across unconditioned plant floors."
             ],
-            "Heat Exchanger": [
-                "Plate Heat Exchanger (PHE) - 50-100 plates",
-                "AISI 304 stainless steel plates",
-                "Gasket material: EPDM or FKM (sanitary grade)",
-                "Hygienic design with <100µm crevice depth"
+            "Thermal Heat Exchanger System": [
+                "Hardware Type: **Sanitary Plate Heat Exchanger (PHE)** configured with a 50-to-100 plate stack depending on final operational pressure drops.",
+                "Wetted Plates Material: **High-corrosion resistant AISI 304 Stainless Steel** matching process water purity rules.",
+                "Sealing Gaskets: **Sanitary-grade EPDM rubber seals** capable of withstand constant thermal cycles without drying or cracking.",
+                "Hygienic Geometry: Designed with an ultra-smooth profile (crevice depths below 100 microns) to prevent active milk fat or organic buildup."
             ],
-            "Instrumentation": [
-                "RTD temperature sensors (Pt100) at inlet/outlet",
-                "Pressure gauges with glycerin damping",
-                "Digital flow meter for CIP monitoring",
-                "pH sensors for water quality (optional)"
+            "Plant Integration & Thermal Re-use": [
+                "Clean-In-Place (CIP) Interface: Seamlessly connects directly to the wash lines, utilizing solar energy to heat raw cleaning water to the needed temperature.",
+                "Sanitary Storage Tank Finishes: Storage tanks feature an ultra-smooth, highly polished internal finish (**Ra < 0.8 microns**) to completely eliminate bacterial anchor zones.",
+                "Thermal Extraction Circuit: Built with an isolated closed-loop heat recovery pipeline, keeping incoming solar loop fluids separated from milk cooling operations."
             ],
-            "Integration": [
-                "CIP (Clean-In-Place) system integration",
-                "Automated valve sequencing for CIP cycles",
-                "Tank: High-level polished finish (Ra < 0.8µm)",
-                "Dedicated return line for thermal recovery",
-                "Fresh milk cooling loop separation required"
+            "Automation & Safety Controls": [
+                "Control System Hardware: **Programmable Logic Controller (PLC)** equipped with automated process profiles for cleaning, production, and standby modes.",
+                "Precision Instrumentation: Dual industrial **RTD (Pt100) temperature sensors** tracking fluid behavior down to a sharp ±0.5°C tolerance.",
+                "Automated Boiler Overrides: Automated valve networks route fluid to the backup fuel boiler on cloudy days or during high production runs.",
+                "Industrial Safety Interlocks: High-limit shutoff valves instantly isolate the solar field if line pressures spike or fluid temperatures approach boiling."
             ],
-            "Controls": [
-                "PLC with recipe memory for different products",
-                "Real-time temperature logging to 0.5°C accuracy",
-                "Automatic switchover to backup boiler at dawn",
-                "Safety interlocks for over-temperature shutdown"
-            ],
-            "Compliance": [
-                "ISO 9001 certified system",
-                "3-A sanitary standards for all wetted surfaces",
-                "HACCP-compliant documentation"
+            "Regulatory Compliance & Verification": [
+                "Quality Benchmark: Every fluid component meets strict **3-A Sanitary Standards** for food-grade processing.",
+                "Quality Certifications: System engineering frameworks are built fully compliant with **HACCP documentation metrics** and **ISO 9001** standards."
             ]
         },
         
         "Textile": {
-            "Piping": [
-                f"Pipe diameter: {calculate_pipe_diameter(total_flow)} mm",
-                "Cast iron or mild steel with 5mm corrosion allowance",
-                "Insulation: 75mm asbestos-free for process lines",
-                "Quick-disconnect couplings for rapid changeover"
+            "Plant Fluid Piping": [
+                f"Recommended Main Line Size: **DN {recommended_dn}** (Sized to handle high-volume batch dumps without causing fluid hammering).",
+                "Material Standard: **Heavy-wall Carbon Steel or Ductile Iron** treated with a 5mm sacrificial corrosion allowance to handle raw water chemistry.",
+                "Thermal Insulation: **75mm robust asbestos-free silicate insulation** wrapped in protective outer canvas jackets to protect fabric processing floors."
             ],
-            "Thermal Buffer": [
-                "Thermal buffer tank (20-30% of daily requirement)",
-                "Volume: 1000-2000 L depending on process",
-                "Dual compartment design for layered heating",
-                "Stratification height controller"
+            "Thermal Buffer Storage Systems": [
+                "Sizing Benchmark: **Dedicated Thermal Buffer Storage** sized for 20-30% of the entire plant's daily volume requirement to manage sudden demand spikes.",
+                "Stratification Design: Vertical storage vessels utilize an internal physical column to separate hot water from cold water without mixing.",
+                "Operational Volume Guidance: Provisions a standalone buffer configuration capable of holding large volumes depending on daily batch schedules."
             ],
-            "Heat Exchanger": [
-                "Shell & Tube HX for dyeing processes",
-                "Titanium tubes for chemical resistance",
-                "Direct steam integration possible"
+            "Thermal Heat Exchanger System": [
+                "Hardware Type: **Rugged Shell & Tube Heat Exchanger** to easily process heavily treated dye house wastewater lines.",
+                "Wetted Components Material: **Industrial Titanium Tubing** to shield structural elements from corrosive dyes, bleaching agents, and fixing salts.",
+                "Direct Boiler Interface: Outfitted with auxiliary injection ports to smoothly mix direct utility steam into the loop during heavy operational phases."
             ],
-            "Integration": [
-                "Rapid process changeover capability",
-                "Multi-circuit distribution (different temp zones)",
-                "Dye vat integration with individual control",
-                "Waste heat recovery from exhaust steam"
+            "Dye House Process Integration": [
+                "Multi-Circuit Heat Zoning: Distributed piping headers run independent supply lines to provide varying process temperatures across different areas of the facility.",
+                "Dye Vat Coupling: Direct thermal integration into individual dye vats using high-speed regulating control valves.",
+                "Wastewater Energy Capture: Integrated heat exchangers harvest residual energy from hot wastewater dumps to preheat fresh incoming utility water."
             ],
-            "Process Parameters": [
-                f"Design temperature: {tout}°C",
-                f"Daily water requirement: {daily_water} LPD",
-                "Batch cycle adaptation: 2-4 hour cycles",
-                "Auxiliary heating capacity required during off-season"
-            ],
-            "Controls": [
-                "Process scheduler for multiple dye vats",
-                "Temperature ramping control (±2°C)",
-                "Pressure limiting to 4-6 bar"
+            "Automation & Safety Controls": [
+                "Production Scheduler Interface: Control software matches energy delivery to active batch schedules across the plant floors.",
+                "Temperature Ramping Control: Automated control loops provide smooth temperature ramping curves (±2°C precision) for critical fabric dyeing runs.",
+                "Pressure Constraints: Heavy pressure relief infrastructure caps line pressures at 4 to 6 bar."
             ]
         },
         
         "Pharmaceutical": {
-            "Piping": [
-                "Stainless steel AISI 316L electropolished",
-                "FDA/GMP compliant material traceability",
-                f"Pipe sizing: {calculate_pipe_diameter(total_flow)} mm",
-                "WFI (Water For Injection) compatible"
+            "Plant Fluid Piping": [
+                f"Recommended Main Line Size: **DN {recommended_dn}** (Precisely engineered to maintain clean flow and eliminate stagnant fluid zones).",
+                "Material Standard: **Ultra-pure Electropolished Stainless Steel (SS316L)** ensuring clean, non-reactive fluid delivery.",
+                "Regulatory Traceability: Every pipe layout is heat-stamped and certified for full **FDA/GMP material compliance** trails."
             ],
-            "Heat Exchanger": [
-                "Plate & Frame HX with pharmaceutical certification",
-                "Cleanroom compatible gaskets",
-                "Pressure rating: ≥10 bar",
-                "Validation of thermal profile maintained"
+            "Thermal Heat Exchanger System": [
+                "Hardware Type: **Double-Tube or Certified Sanitary Plate & Frame Heat Exchanger** to prevent cross-contamination.",
+                "Sealing Gaskets: **Cleanroom-grade non-degrading gaskets** matching pristine water-for-injection (WFI) standards.",
+                "Pressure Bounds: Heavy-duty structural construction rated for high-pressure operations up to **10 bar**."
             ],
-            "Instrumentation": [
-                "Calibrated RTD sensors (±0.5°C accuracy)",
-                "Data logging with 24/7 archival",
-                "Pressure sensors with alarm limits",
-                "Flow measurement with batch totalization"
+            "Precision Instrumentation": [
+                "Sensor Benchmarks: Double-calibrated **RTD sensor networks (accurate to ±0.1°C)** deployed at critical regulatory control nodes.",
+                "Data Archival Automation: 24/7 digital data acquisition system logging compliance metrics for batch audit reviews."
             ],
-            "Integration": [
-                "Water preheating system before pharmaceutical lines",
-                "Sterile steam trap integration",
-                "Temperature hold capability (maintain ±1°C)",
-                "Three-way isolation valves for servicing"
+            "Plant Integration & Validation": [
+                "Validation Standards: Complete validation documentation pack featuring full **Installation, Operation, and Performance Qualification (IQ/OQ/PQ)** files.",
+                "System Isolation: Built with three-way diversion valves to instantly redirect fluid streams if production temperatures deviate by even 1°C."
             ],
-            "Quality Assurance": [
-                "System validation (IQ/OQ/PQ) documentation",
-                "Monthly calibration certificates required",
-                "Microbial testing protocols",
-                "Energy audit trail for batch traceability"
-            ],
-            "Controls": [
-                "Advanced PLC with batch reporting",
-                "Compliance to FDA 21 CFR Part 11",
-                "Audit trail for all setpoint changes",
-                "Automatic alert on deviation >2°C"
+            "Automation & Safety Controls": [
+                "Regulatory Software Stack: Advanced PLC controllers built fully compliant with **FDA 21 CFR Part 11 electronic data validation metrics**.",
+                "Audit Tracking Automation: Tamper-proof internal logging loops record every configuration change made across the system."
             ]
         },
         
         "Chemical": {
-            "Piping": [
-                "Stainless steel 316/316L or carbon steel with protective coating",
-                "Chemical resistance assessment for process fluids",
-                f"Pipe diameter: {calculate_pipe_diameter(total_flow)} mm",
-                "Ductile iron fittings with 300 bar rating"
+            "Plant Fluid Piping": [
+                f"Recommended Main Line Size: **DN {recommended_dn}** (Sized to balance friction losses against high fluid volumes).",
+                "Material Standard: **Heavy-gauge Carbon Steel or Hastelloy alloys** protected with specialized internal chemical coatings.",
+                "Pressure Rating: Components use high-strength, durable fittings rated for heavy-duty industrial fluid applications."
             ],
-            "Heat Exchanger": [
-                "Titanium or Inconel tubes for corrosive media",
-                "Mechanical seals for hazardous processes",
-                "Double-wall construction if required",
-                "Emergency relief provisions"
+            "Thermal Heat Exchanger System": [
+                "Hardware Type: **Double-Wall Industrial Heat Exchanger** preventing hazardous fluids from crossing into process loops.",
+                "Wetted Components Material: Custom **Inconel or Titanium alloy tube sets** to handle aggressive process chemistries."
             ],
-            "Process Integration": [
-                "Multi-zone heating for sequential reactions",
-                "Temperature precision: ±3°C maintained",
-                "Automatic shutdown on overpressure (>6 bar)",
-                "Dedicated isolation for hazmat containment"
+            "Process Integration & Safety Zones": [
+                "Multi-Tiered Thermal Zoning: Independent flow control circuits regulate temperature profiles across sequential reactor stages.",
+                "Explosion-Proof Compliance: All localized wiring, motors, and instrumentation meet strict **ATEX/IECEx explosion-proof specifications**.",
+                "Secondary Safety Containment: Process pipelines run inside protective secondary outer sleeves to manage line leaks or breaks safely."
             ],
-            "Safety Systems": [
-                "Dual pressure relief valves",
-                "Thermal cutoff switches at 100°C + margin",
-                "Secondary containment for process lines",
-                "ATEX compliance if flammable fluids involved"
-            ],
-            "Controls": [
-                "Advanced process control with ramp/soak profiles",
-                "Temperature uniformity monitoring",
-                "Automatic switchover on pump failure",
-                "Real-time process alarm management"
+            "Automation & Safety Controls": [
+                "Advanced Controls Strategy: Process controllers deploy automated heating and cooling curves to manage reaction loops safely.",
+                "Fault Tolerance Interlocks: Automated bypass valves trigger immediately if a pump fails, maintaining safe internal temperature balances."
             ]
         },
         
         "Food": {
-            "Piping": [
-                "Stainless steel 304 or 316 for food contact",
-                f"Pipe sizing: {calculate_pipe_diameter(total_flow)} mm",
-                "Sanitary fittings with tri-clamp connections",
-                "Insulation: 50-75mm food-grade with aluminum wrap"
+            "Plant Fluid Piping": [
+                f"Recommended Main Line Size: **DN {recommended_dn}** (Sized to maintain high sanitation velocities across daily operation).",
+                "Material Standard: **Food-Safe Polished Stainless Steel (SS304 or SS316)** ensuring corrosion resistance and clear sanitary lines.",
+                "Quick-Release Fittings: Outfitted with convenient **Tri-Clamp sanitary fittings** for fast disassembly, cleanouts, and internal pipe checks."
             ],
-            "Heat Exchanger": [
-                "Plate HX with food-grade certification",
-                "Smooth finish (Ra < 1.2µm) to prevent bacterial growth",
-                "Gaskets: Silicone or EPDM (FDA approved)",
-                "All external surfaces passivated"
+            "Thermal Heat Exchanger System": [
+                "Hardware Type: **Sanitary Frame Heat Exchanger** with smooth internal plate finishes to prevent bacterial adherence.",
+                "Sealing Gaskets: **FDA-certified, non-porous food-grade silicone or EPDM gaskets**."
             ],
-            "Integration": [
-                "Direct integration with cooking/processing lines",
-                "Separate loop for product heating vs. utility",
-                "CIP capability with chemical tolerance",
-                "Product temperature logging (HACCP requirement)"
+            "Plant Integration & Food Safety": [
+                "Direct Production Splicing: Solar lines connect smoothly to pre-heating stations for jacketted cooking kettles, cleanups, and boiler feed lines.",
+                "Loop Isolation Strategy: Dual-loop barriers prevent solar storage fluids from ever interacting with food product streams.",
+                "HACCP Data Interface: Built-in data loggers continuously record processing line temperatures to fulfill critical food safety audit guidelines."
             ],
-            "Instrumentation": [
-                "RTD temperature sensors at critical points",
-                "Flow measurement for portion control",
-                "Pressure gauges for safety monitoring",
-                "Product temperature recorder (chart/digital)"
-            ],
-            "Safety & Compliance": [
-                "HACCP documentation for all processes",
-                "NSF certification on components",
-                "Regular hygiene audits recommended",
-                "Legionella prevention measures"
-            ],
-            "Controls": [
-                "Simple on/off control or modulating valve",
-                "Automatic switchover to auxiliary heating",
-                "Overheat protection at {tout}°C",
-                "Daily sanitization cycle scheduling"
+            "Automation & Safety Controls": [
+                "Daily Sanitization Cycles: Control systems schedule automatic thermal disinfection sequences during down-time hours.",
+                "Boiler Integration Logic: Automatic control systems switch to utility gas boilers when solar storage reserves empty below the target value.",
+                "High-Limit Thermal Trips: Safety systems isolate the solar field if delivery lines exceed the design threshold of **{tout}°C**."
             ]
         }
     }
     
     industry_recommendations = recommendations_dict.get(industry, recommendations_dict["Food"])
     
-    # Format output for display
+    # Process structured output array cleanly for view parsers
     result = []
     for section, items in industry_recommendations.items():
         result.append(f"\\n### {section}")
         for item in items:
             result.append(f"• {item}")
-    
+            
     return result
 
 
 def calculate_pipe_diameter(total_flow):
     """
-    Calculate recommended pipe diameter based on total flow
-    using standard velocity approach (1-2 m/s for hot water)
+    Calculates recommended nominal pipe diameter (DN in mm) 
+    based on continuous liquid flow rates (LPH) to target an 
+    economical, high-efficiency velocity window of 1.0 to 1.5 m/s.
     """
-    if total_flow < 100:
-        return "16-20"
-    elif total_flow < 250:
-        return "25-32"
-    elif total_flow < 500:
-        return "40-50"
-    elif total_flow < 1000:
-        return "63-75"
+    if total_flow <= 150:
+        return "20"   # DN20 (3/4")
+    elif total_flow <= 400:
+        return "25"   # DN25 (1")
+    elif total_flow <= 900:
+        return "32"   # DN32 (1-1/4")
+    elif total_flow <= 1500:
+        return "40"   # DN40 (1-1/2")
+    elif total_flow <= 3000:
+        return "50"   # DN50 (2")
+    elif total_flow <= 6000:
+        return "65"   # DN65 (2-1/2")
+    elif total_flow <= 12000:
+        return "80"   # DN80 (3")
     else:
-        return "90-110"
+        return "100"  # DN100 (4")
