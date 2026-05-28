@@ -13,6 +13,9 @@ from engines.installation_engine import *
 from engines.literature_engine import *
 from engines.hydraulic_engine import *
 
+# Explicitly forcing fresh registration of your newer analytical functions
+from engines.thermal_engine import generate_proposal_analytics, simulate_diurnal_curve
+
 # =====================================================
 # PAGE CONFIG
 # =====================================================
@@ -138,7 +141,7 @@ fuel_cost = st.sidebar.number_input(
 )
 
 # =====================================================
-# THERMAL CALCULATION
+# THERMAL CALCULATION (CORRECTED LINE 161 CRASH FIX)
 # =====================================================
 
 load = thermal_load(
@@ -158,17 +161,13 @@ eta = collector_efficiency(
     irradiance
 )
 
-output = collector_output(
-    aperture_area,
-    eta,
-    irradiance
-)
+# Derive instantaneous collector capacity using the updated engine parameters
+instantaneous_output_w = (aperture_area * eta * irradiance)
 
-daily_output = (
-    output *
-    peak_hours
-) / 1000
+# Map continuous daily baseline generation (kWh/day) per individual module
+daily_output = (instantaneous_output_w * peak_hours) / 1000.0
 
+# Calculate required number of collectors with systemic loss tolerances
 collectors = collectors_required(
     load,
     daily_output
@@ -297,15 +296,15 @@ with tabs[0]:
     )
 
 # =====================================================
-# =====================================================
-# THERMAL TAB (UPDATED FOR COMMERCIAL PROPOSALS)
+# THERMAL TAB (CORRECTED LINE 309 ENGINE MATRIX)
 # =====================================================
 
 with tabs[1]:
+
     st.header("Advanced Thermal Analysis & Proposal Metrics")
     st.markdown("---")
 
-    # 1. Run the expert proposal analytics simulation engine
+    # Run the comprehensive commercial proposal simulation loop
     daily_plant_load, monthly_analytics_list = generate_proposal_analytics(
         lpd=daily_water,
         tin=tin,
@@ -317,10 +316,10 @@ with tabs[1]:
         aperture_area=aperture_area
     )
     
-    # Convert simulation list to an easy-to-read DataFrame for calculations
+    # Store analytics results as a Pandas DataFrame
     df_analytics = pd.DataFrame(monthly_analytics_list)
 
-    # 2. Executive Pitch Summary Indicators (C-Suite Value Metrics)
+    # Executive Value-Add Metrics Section
     st.subheader("Annualized Projected Savings Summary")
     summary_col1, summary_col2, summary_col3 = st.columns(3)
     
@@ -343,7 +342,7 @@ with tabs[1]:
     
     st.markdown("---")
 
-    # 3. Interactive Proposal Data Matrix (Visible Verification for Engineering Teams)
+    # Interactive Seasonality Grid
     st.subheader("Seasonal Performance Matrix (Month-by-Month Simulation)")
     st.dataframe(
         df_analytics,
@@ -361,13 +360,12 @@ with tabs[1]:
 
     st.markdown("---")
 
-    # 4. Graphical Proposal Visualization Blocks
+    # Chart Area Block
     st.subheader("Engineering Performance Curves")
     chart_col1, chart_col2 = st.columns(2)
 
     with chart_col1:
         st.markdown("**Collector Thermal Efficiency Profile**")
-        # Plots efficiency drop relative to fluid temperature rise
         fig_efficiency = efficiency_plot(
             eta0,
             a1,
@@ -382,17 +380,17 @@ with tabs[1]:
 
     with chart_col2:
         st.markdown("**Diurnal Energy Generation Profile (Clear vs. Cloudy)**")
-        # Simulates 24-hour heat collection cycle using the new engine function
         hourly_data = simulate_diurnal_curve(tin, tout, ambient, irradiance)
         df_hourly = pd.DataFrame(hourly_data)
         
-        # Use simple Streamlit area charts to show daily peak matching performance instantly
         st.area_chart(
             df_hourly, 
             x="Hour", 
             y="Instantaneous Output (W/m²)", 
             color="#0284c7"
-        )# =====================================================
+        )
+
+# =====================================================
 # LAYOUT TAB
 # =====================================================
 
@@ -400,7 +398,6 @@ with tabs[2]:
 
     st.header("Solar Field Layout")
     
-    # 1. Provide clean layout controls directly in the view pane
     st.subheader("Array Matrix Control Structure")
     col_ui1, col_ui2, col_ui3 = st.columns(3)
     
@@ -411,16 +408,15 @@ with tabs[2]:
     with col_ui3:
         selected_tilt = st.slider("Collector Tilt Angle (°)", 0, 60, 30)
 
-    # 2. Track geometric constraints based on explicit user variables
+    # Re-verify layout bounds and sizing parameters
     winter_solstice_altitude = 90.0 - abs(latitude + 23.45)
     vertical_rise = collector_height * math.sin(math.radians(selected_tilt))
     panel_ground_footprint = collector_height * math.cos(math.radians(selected_tilt))
 
-    # Calculate optimal anti-shading layout pitch
     min_shading_space = vertical_rise / math.tan(math.radians(winter_solstice_altitude))
-    ideal_pitch_distance = panel_ground_footprint + min_shading_space + 0.5  # Adding a 0.5m maintenance clearance buffer
+    ideal_pitch_distance = panel_ground_footprint + min_shading_space + 0.5 
 
-    # 3. Feed fully-mapped reactive parameters directly into your engine
+    # Plot responsive engineering blueprint maps
     fig = draw_layout(
         rows=input_rows,
         cols=input_cols,
@@ -431,7 +427,6 @@ with tabs[2]:
         latitude=latitude
     )
 
-    # 4. Safely render layout charts
     st.pyplot(fig)
 
 # =====================================================
@@ -529,20 +524,18 @@ with tabs[5]:
     st.header("Real-Time System Integration Blueprint")
     st.markdown("---")
     
-    # Capture all dynamic sidebar data and inject into the thermodynamics engine
     integration_blueprint = render_dynamic_integration_ui(
-        industry=industry,                                           # Active industry selector
-        tout=tout,                                                   # Target Outlet Temp Slider (°C)
-        tinlet=tin if 'tin' in locals() else 25,                     # Inlet Temp Slider (°C)
-        tambient=ambient if 'ambient' in locals() else 30,           # Ambient Temp Slider (°C)
-        daily_water=daily_water,                                     # Processing Volume Load (LPD)
-        total_flow=total_flow,                                       # Fluid circulation flow rate (LPH)
-        eta_0=eta0 if 'eta0' in locals() else 0.75,                  # Intercept efficiency coefficient
-        a1=a1 if 'a1' in locals() else 3.5,                          # First-order efficiency coefficient
-        a2=a2 if 'a2' in locals() else 0.015                         # Second-order efficiency coefficient
+        industry=industry,                                           
+        tout=tout,                                                   
+        tinlet=tin if 'tin' in locals() else 25,                     
+        tambient=ambient if 'ambient' in locals() else 30,           
+        daily_water=daily_water,                                     
+        total_flow=total_flow,                                       
+        eta_0=eta0 if 'eta0' in locals() else 0.75,                  
+        a1=a1 if 'a1' in locals() else 3.5,                          
+        a2=a2 if 'a2' in locals() else 0.015                         
     )
     
-    # Render the interactive graphical cards array onto the application screen
     st.html(integration_blueprint)
 
 # =====================================================
