@@ -15,6 +15,7 @@ from engines.hydraulic_engine import *
 
 # Explicitly forcing fresh registration of your newer analytical functions
 from engines.thermal_engine import generate_proposal_analytics, simulate_diurnal_curve
+from engines.plotting_engine import create_proposal_plots
 
 # =====================================================
 # PAGE CONFIG
@@ -141,7 +142,7 @@ fuel_cost = st.sidebar.number_input(
 )
 
 # =====================================================
-# THERMAL CALCULATION (CORRECTED LINE 161 CRASH FIX)
+# THERMAL CALCULATION 
 # =====================================================
 
 load = thermal_load(
@@ -296,15 +297,15 @@ with tabs[0]:
     )
 
 # =====================================================
-# =====================================================
 # THERMAL TAB (EXECUTIVE VISUALIZATION DISPLAY)
 # =====================================================
 
 with tabs[1]:
+
     st.header("Advanced Thermal Analysis & Proposal Metrics")
     st.markdown("---")
 
-    # 1. Execute the comprehensive simulation calculations
+    # Run the comprehensive commercial proposal simulation loop
     daily_plant_load, monthly_analytics_list = generate_proposal_analytics(
         lpd=daily_water,
         tin=tin,
@@ -316,9 +317,10 @@ with tabs[1]:
         aperture_area=aperture_area
     )
     
+    # Store analytics results as a Pandas DataFrame
     df_analytics = pd.DataFrame(monthly_analytics_list)
 
-    # 2. Key Performance Metric Highlights
+    # Executive Value-Add Metrics Section
     st.subheader("Annualized Projected Savings Summary")
     summary_col1, summary_col2, summary_col3 = st.columns(3)
     
@@ -341,11 +343,11 @@ with tabs[1]:
     
     st.markdown("---")
 
-    # 3. Interactive Graphical Proposal Visualizations (Side-by-Side Panels)
+    # Graphical Proposal Visualizations (Side-by-Side Panels)
     st.subheader("Executive Proposal Performance Dashboards")
     graph_col1, graph_col2 = st.columns(2)
     
-    # Generate presentation charts from our upgraded plotting module
+    # Generate interactive presentation charts from the upgraded plotting module
     fig_perf, fig_save = create_proposal_plots(df_analytics)
     
     with graph_col1:
@@ -356,7 +358,7 @@ with tabs[1]:
 
     st.markdown("---")
 
-    # 4. Verification Data Grid
+    # Interactive Seasonality Grid
     st.subheader("Seasonal Performance Matrix (Month-by-Month Simulation Verification)")
     st.dataframe(
         df_analytics,
@@ -371,6 +373,7 @@ with tabs[1]:
         hide_index=True,
         use_container_width=True
     )
+
 # =====================================================
 # LAYOUT TAB
 # =====================================================
