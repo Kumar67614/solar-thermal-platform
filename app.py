@@ -366,9 +366,27 @@ with tabs[2]:
 
 with tabs[3]:
 
-    st.header("Industrial P&ID")
+    st.header("Industrial P&ID (Piping & Instrumentation Diagram)")
+    
+    st.subheader(f"System Configuration: {industry} Industry")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write(f"**Collectors:** {collectors}")
+        st.write(f"**Daily Demand:** {daily_water} LPD")
+        st.write(f"**Outlet Temp:** {tout}°C")
+    with col2:
+        st.write(f"**Total Flow:** {total_flow:.0f} LPH")
+        st.write(f"**Inlet Temp:** {tin}°C")
+        st.write(f"**System Load:** {load:.1f} kWh/day")
 
-    pid = generate_pid()
+    pid = generate_pid(
+        industry=industry,
+        collectors=collectors,
+        tout=tout,
+        daily_water=daily_water,
+        total_flow=total_flow
+    )
 
     st.graphviz_chart(pid)
 
@@ -436,15 +454,27 @@ with tabs[4]:
 
 with tabs[5]:
 
-    st.header("System Integration")
-
+    st.header("System Integration & Requirements")
+    
+    st.info(f"Detailed integration specifications for **{industry}** industry")
+    
     rec = recommendations(
-        industry
+        industry=industry,
+        tout=tout,
+        daily_water=daily_water,
+        total_flow=total_flow
     )
 
-    for r in rec:
-
-        st.success(r)
+    # Format recommendations by section
+    current_section = None
+    for item in rec:
+        if item.startswith("###"):
+            if current_section is not None:
+                st.divider()
+            st.subheader(item.replace("###", "").strip())
+            current_section = item
+        elif item.startswith("•"):
+            st.write(item)
 
 # =====================================================
 # INSTALLATION TAB
