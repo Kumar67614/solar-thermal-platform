@@ -297,15 +297,15 @@ with tabs[0]:
     )
 
 # =====================================================
+# =====================================================
 # THERMAL TAB (EXECUTIVE VISUALIZATION DISPLAY)
 # =====================================================
 
 with tabs[1]:
-
     st.header("Advanced Thermal Analysis & Proposal Metrics")
     st.markdown("---")
 
-    # Run the comprehensive commercial proposal simulation loop
+    # 1. Execute the comprehensive simulation calculations
     daily_plant_load, monthly_analytics_list = generate_proposal_analytics(
         lpd=daily_water,
         tin=tin,
@@ -317,17 +317,23 @@ with tabs[1]:
         aperture_area=aperture_area
     )
     
-    # Store analytics results as a Pandas DataFrame
+    # Generate DataFrame and explicitly ensure columns are typed properly
     df_analytics = pd.DataFrame(monthly_analytics_list)
+    
+    # Safeguard calculations against empty lists/data structures
+    if not df_analytics.empty:
+        total_annual_fuel_saved = float(df_analytics["Fuel Saved (Liters/month)"].sum())
+        total_annual_co2_saved = float(df_analytics["CO2 Mitigated (kg/month)"].sum())
+        average_solar_fraction = float(df_analytics["Solar Fraction (%)"].mean())
+    else:
+        total_annual_fuel_saved = 0.0
+        total_annual_co2_saved = 0.0
+        average_solar_fraction = 0.0
 
-    # Executive Value-Add Metrics Section
+    # 2. Key Performance Metric Highlights (C-Suite Value Trackers)
     st.subheader("Annualized Projected Savings Summary")
     summary_col1, summary_col2, summary_col3 = st.columns(3)
     
-    total_annual_fuel_saved = df_analytics["Fuel Saved (Liters/month)"].sum()
-    total_annual_co2_saved = df_analytics["CO2 Mitigated (kg/month)"].sum()
-    average_solar_fraction = df_analytics["Solar Fraction (%)"].mean()
-
     summary_col1.metric(
         label="🔥 Total Fuel Displaced Annually",
         value=f"{total_annual_fuel_saved:,.0f} Liters / Year"
@@ -343,27 +349,35 @@ with tabs[1]:
     
     st.markdown("---")
 
-    # Graphical Proposal Visualizations (Side-by-Side Panels)
+    # 3. Interactive Graphical Proposal Visualizations (Side-by-Side Performance Charts)
     st.subheader("Executive Proposal Performance Dashboards")
     graph_col1, graph_col2 = st.columns(2)
     
-    # Generate interactive presentation charts from the upgraded plotting module
+    # Generate interactive presentation charts from your upgraded plotting module
     fig_perf, fig_save = create_proposal_plots(df_analytics)
     
     with graph_col1:
-        st.plotly_chart(fig_perf, use_container_width=True, key='proposal_seasonal_performance')
+        st.plotly_chart(
+            fig_perf, 
+            use_container_width=True, 
+            key='proposal_seasonal_performance'
+        )
         
     with graph_col2:
-        st.plotly_chart(fig_save, use_container_width=True, key='proposal_financial_sustainability')
+        st.plotly_chart(
+            fig_save, 
+            use_container_width=True, 
+            key='proposal_financial_sustainability'
+        )
 
     st.markdown("---")
 
-    # Interactive Seasonality Grid
+    # 4. Technical Verification Data Grid
     st.subheader("Seasonal Performance Matrix (Month-by-Month Simulation Verification)")
     st.dataframe(
         df_analytics,
         column_config={
-            "Month": "Operational Month",
+            "Month": st.column_config.TextColumn("Operational Month"),
             "Efficiency (%)": st.column_config.NumberColumn("Avg Efficiency", format="%d%%"),
             "Collector Yield (kWh/day)": st.column_config.NumberColumn("Daily Energy Yield", format="%.1f kWh"),
             "Solar Fraction (%)": st.column_config.NumberColumn("Boiler Offset", format="%.1f%%"),
