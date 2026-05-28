@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import math
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 from engines.thermal_engine import *
 from engines.layout_engine import *
@@ -15,7 +17,6 @@ from engines.hydraulic_engine import *
 
 # Explicitly forcing fresh registration of your newer analytical functions
 from engines.thermal_engine import generate_proposal_analytics, simulate_diurnal_curve
-from engines.plotting_engine import create_proposal_plots
 
 # =====================================================
 # PAGE CONFIG
@@ -297,11 +298,11 @@ with tabs[0]:
     )
 
 # =====================================================
-# =====================================================
 # THERMAL TAB (EXECUTIVE VISUALIZATION DISPLAY)
 # =====================================================
 
 with tabs[1]:
+
     st.header("Advanced Thermal Analysis & Proposal Metrics")
     st.markdown("---")
 
@@ -349,26 +350,79 @@ with tabs[1]:
     
     st.markdown("---")
 
-    # 3. Interactive Graphical Proposal Visualizations (Side-by-Side Performance Charts)
+    # 3. Interactive Graphical Proposal Visualizations (Inlined to prevent ImportErrors)
     st.subheader("Executive Proposal Performance Dashboards")
     graph_col1, graph_col2 = st.columns(2)
     
-    # Generate interactive presentation charts from your upgraded plotting module
-    fig_perf, fig_save = create_proposal_plots(df_analytics)
+    # --- CHART 1 GENERATION: ENERGY YIELD & SOLAR FRACTION ---
+    fig_perf = make_subplots(specs=[[{"secondary_y": True}]])
+    fig_perf.add_trace(
+        go.Bar(
+            x=df_analytics["Month"],
+            y=df_analytics["Collector Yield (kWh/day)"],
+            name="Daily Thermal Yield (kWh)",
+            marker_color="#0284c7",
+            opacity=0.85
+        ),
+        secondary_y=False
+    )
+    fig_perf.add_trace(
+        go.Scatter(
+            x=df_analytics["Month"],
+            y=df_analytics["Solar Fraction (%)"],
+            name="Solar Fraction (%)",
+            mode="lines+markers",
+            line=dict(color="#16a34a", width=3)
+        ),
+        secondary_y=True
+    )
+    fig_perf.update_layout(
+        title="<b>Seasonal Energy Yield & Grid Independence Profile</b>",
+        legend=dict(orientation="h", y=1.1, x=0.5, xanchor="center"),
+        plot_bgcolor="#ffffff",
+        height=400,
+        margin=dict(l=20, r=20, t=50, b=20)
+    )
+    fig_perf.update_yaxes(title_text="Daily Yield (kWh)", secondary_y=False, gridcolor="#f1f5f9")
+    fig_perf.update_yaxes(title_text="Solar Fraction (%)", range=[0, 110], secondary_y=True, showgrid=False)
+
+    # --- CHART 2 GENERATION: FUEL DISPLACEMENT & CARBON OFFSETS ---
+    fig_save = make_subplots(specs=[[{"secondary_y": True}]])
+    fig_save.add_trace(
+        go.Bar(
+            x=df_analytics["Month"],
+            y=df_analytics["Fuel Saved (Liters/month)"],
+            name="Fossil Fuel Displaced (L)",
+            marker_color="#ea580c",
+            opacity=0.85
+        ),
+        secondary_y=False
+    )
+    fig_save.add_trace(
+        go.Scatter(
+            x=df_analytics["Month"],
+            y=df_analytics["CO2 Mitigated (kg/month)"] / 1000.0,
+            name="Carbon Footprint Abated (Tons)",
+            mode="lines+markers",
+            line=dict(color="#047857", width=3, dash="dash")
+        ),
+        secondary_y=True
+    )
+    fig_save.update_layout(
+        title="<b>Monthly Operational Cost Shield & Carbon Offsets</b>",
+        legend=dict(orientation="h", y=1.1, x=0.5, xanchor="center"),
+        plot_bgcolor="#ffffff",
+        height=400,
+        margin=dict(l=20, r=20, t=50, b=20)
+    )
+    fig_save.update_yaxes(title_text="Fuel Saved (Liters)", secondary_y=False, gridcolor="#f1f5f9")
+    fig_save.update_yaxes(title_text="CO2 Saved (Metric Tons)", secondary_y=True, showgrid=False)
     
     with graph_col1:
-        st.plotly_chart(
-            fig_perf, 
-            use_container_width=True, 
-            key='proposal_seasonal_performance'
-        )
+        st.plotly_chart(fig_perf, use_container_width=True, key='proposal_seasonal_performance')
         
     with graph_col2:
-        st.plotly_chart(
-            fig_save, 
-            use_container_width=True, 
-            key='proposal_financial_sustainability'
-        )
+        st.plotly_chart(fig_save, use_container_width=True, key='proposal_financial_sustainability')
 
     st.markdown("---")
 
