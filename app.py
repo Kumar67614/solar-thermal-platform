@@ -592,41 +592,60 @@ with tabs[5]:
 
 # =====================================================
 # =====================================================
-# INSTALLATION TAB (DETAILED INDUSTRIAL SPECIFICATIONS)
+# =====================================================
+# INSTALLATION TAB (SIMPLIFIED LAYMAN-FRIENDLY VIEW)
 # =====================================================
 
 with tabs[6]:
-    st.header("Industrial Field Installation Blueprint & Compliance Roadmap")
-    st.markdown("This section details the formal engineering steps, safety milestones, and quality control metrics required to successfully commission the solar thermal system at the facility.")
+    st.header("Step-by-Step System Installation Guide")
+    st.markdown("Here is a simple, easy-to-understand breakdown of how we take your project from a bare roof to a fully operational, fuel-saving solar plant.")
     st.markdown("---")
 
-    # Pull the expanded data dictionary from our upgraded engine file
+    # 1. Visual Flowchart Block for Quick Overview
+    st.subheader("🗓️ Project Timeline at a Glance")
+    
+    flowchart_html = """
+    <div style="background-color: #f8fafc; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; margin-bottom: 25px;">
+        <span style="font-weight: bold; color: #0284c7;">1. Marking Spots</span> ➔ 
+        <span style="font-weight: bold; color: #0284c7;">2. Building Racks</span> ➔ 
+        <span style="font-weight: bold; color: #0284c7;">3. Mounting Panels</span> ➔ 
+        <span style="font-weight: bold; color: #0284c7;">4. Connecting Pipes</span>
+        <br><br>
+        <span style="font-weight: bold; color: #16a34a;">8. System Live!</span> 🮪 
+        <span style="font-weight: bold; color: #475569;">7. Wiring Brains</span> 🮪 
+        <span style="font-weight: bold; color: #475569;">6. Pipe Jackets</span> 🮪 
+        <span style="font-weight: bold; color: #ea580c;">5. Leak Testing</span>
+    </div>
+    """
+    st.html(flowchart_html)
+
+    # 2. Extract Layman-Friendly Steps from the Installation Engine
     installation_data = installation_steps()
 
-    # Loop through the comprehensive dataset and construct clean interface cards
+    st.subheader("📋 Detailed Phase-by-Phase Breakdown")
+    
+    # Loop through and build clean, collapsible dropdown info cards
     for idx, item in enumerate(installation_data):
         with st.container():
-            # Use an expander for clean layout, showing step names as headers
-            with st.expander(f"**Step {idx+1}: {item['icon']} {item['step']}**", expanded=(idx==0)):
+            # First card stays open automatically so the page looks active
+            with st.expander(f"**Step {idx+1}: {item['icon']} {item['step']}**", expanded=(idx == 0)):
                 
                 col_desc, col_checklist = st.columns([2, 1])
                 
                 with col_desc:
-                    st.markdown("##### 📝 Procedural Description")
+                    st.markdown("##### 📝 What we do:")
                     st.write(item["description"])
                     
-                    st.markdown("##### ⚙️ Technical Tolerance & Engineering Specs")
+                    st.markdown("##### ✨ Why it matters:")
                     st.info(item["specs"])
                 
                 with col_checklist:
-                    st.markdown("##### 🔍 Quality Sign-off Checklist")
-                    # Render interactive validation checklists for on-site execution simulation
+                    st.markdown("##### 🔍 Quality Checks:")
+                    # Generate dynamic interactive checkboxes for the customer
                     for check in item["checklist"]:
-                        st.checkbox(check, key=f"install_chk_{idx}_{hash(check)}")
+                        st.checkbox(check, key=f"layman_install_chk_{idx}_{hash(check)}")
             
-        st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-
-# =====================================================
+        st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
 # LITERATURE TAB
 # =====================================================
 
