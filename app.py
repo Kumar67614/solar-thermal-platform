@@ -448,27 +448,28 @@ with tabs[4]:
     )
 
 # =====================================================
-# INTEGRATION TAB VIEW MODULE
-# =====================================================
+# SYSTEM INTEGRATION DASHBOARD VIEW TAB MODULE
+# ==============================================================================
 
 with tabs[5]:
-    st.header("System Integration & Requirements")
-    st.info(f"Detailed integration specifications for **{industry}** industry applications.")
+    st.header("Real-Time System Integration Blueprint")
+    st.markdown("---")
     
-    # Generate the highly pictorial product blueprint view layout
-    proposal_view = recommendations(
-        industry=industry,
-        tout=tout,
-        tinlet=inlet_temp if 'inlet_temp' in locals() else 25,       # Links to 'Inlet Temperature' slider
-        tambient=ambient_temp if 'ambient_temp' in locals() else 30, # Links to 'Ambient Temperature' slider
-        daily_water=daily_water,                                     # Links to LPD input
-        total_flow=total_flow                                        # Links to active LPH calculation flow rate
+    # Capture all dynamic sidebar data and inject into the thermodynamics engine
+    integration_blueprint = render_dynamic_integration_ui(
+        industry=industry,                                           # Active industry selector
+        tout=tout,                                                   # Target Outlet Temp Slider (°C)
+        tinlet=inlet_temp if 'inlet_temp' in locals() else 25,       # Inlet Temp Slider (°C)
+        tambient=ambient_temp if 'ambient_temp' in locals() else 30, # Ambient Temp Slider (°C)
+        daily_water=daily_water,                                     # Processing Volume Load (LPD)
+        total_flow=total_flow,                                       # Fluid circulation flow rate (LPH)
+        eta_0=0.75,                                                  # Intercept efficiency coefficient
+        a1=3.5,                                                      # First-order efficiency coefficient
+        a2=0.015                                                     # Second-order efficiency coefficient
     )
-
-    # Render the structured HTML components onto the screen layout
-    st.html(proposal_view)
-    # =====================================================
-# INSTALLATION TAB
+    
+    # Render the interactive graphical cards array onto the application screen
+    st.html(integration_blueprint)# INSTALLATION TAB
 # =====================================================
 
 with tabs[6]:
