@@ -15,8 +15,15 @@ from engines.installation_engine import *
 from engines.literature_engine import *
 from engines.hydraulic_engine import *
 
-# Explicitly forcing fresh registration of your newer analytical functions
+# Explicitly forcing fresh registration of your analytical and financial functions
 from engines.thermal_engine import generate_proposal_analytics, simulate_diurnal_curve
+from engines.financial_engine import (
+    calculate_market_project_cost,
+    calculate_real_annual_savings,
+    calculate_dynamic_payback,
+    calculate_comprehensive_npv,
+    generate_financial_timeline_dataframe
+)
 
 # =====================================================
 # PAGE CONFIG
@@ -196,6 +203,22 @@ head = pump_head(
 )
 
 # =====================================================
+# PRE-COMPUTE THERMAL ANALYTICS FOR SHARED DATA DEPENDENCIES
+# =====================================================
+
+daily_plant_load, monthly_analytics_list = generate_proposal_analytics(
+    lpd=daily_water,
+    tin=tin,
+    tout=tout,
+    latitude=latitude,
+    eta0=eta0,
+    a1=a1,
+    a2=a2,
+    aperture_area=aperture_area
+)
+df_analytics = pd.DataFrame(monthly_analytics_list)
+
+# =====================================================
 # TABS
 # =====================================================
 
@@ -246,54 +269,85 @@ with tabs[0]:
     st.subheader("Financial Analysis")
     f1, f2, f3, f4 = st.columns(4)
 
-    cost = project_cost(
-        total_area
+    # Market-calibrated pricing functions replacing basic project_cost()
+    cost_dash = calculate_market_project_cost(
+        total_area=total_area, 
+        collector_type=collector_type
     )
 
-    savings = annual_savings(
-        load*300,
-        fuel_cost
+    annual_energy_yield_sum_kwh = float(df_analytics["Collector Yield (kWh/day)"].sum() * 30.4)
+    savings_dash = calculate_real_annual_savings(
+        annual_energy_yield_kwh=annual_energy_yield_sum_kwh, 
+        fuel_cost_per_kwh=fuel_cost
     )
 
-    pb = payback(
-        cost,
-        savings
+    pb_dash = calculate_dynamic_payback(
+        initial_investment=cost_dash,
+        year_one_savings=savings_dash,
+        fuel_escalation=0.06,
+        annual_degradation=0.01,
+        opex_rate=0.02
     )
 
-    n = npv(
-        cost,
-        savings,
-        20,
-        0.08
+    n_dash = calculate_comprehensive_npv(
+        initial_investment=cost_dash,
+        year_one_savings=savings_dash,
+        lifecycle_years=20,
+        discount_rate=0.08,
+        fuel_escalation=0.06,
+        annual_degradation=0.01,
+        opex_rate=0.02
     )
 
     f1.metric(
         "Project Cost",
-        f"₹ {cost:,.0f}"
+        f"₹ {cost_dash:,.0f}"
     )
 
     f2.metric(
         "Annual Savings",
-        f"₹ {savings:,.0f}"
+        f"₹ {savings_dash:,.0f}"
     )
 
     f3.metric(
         "Payback Period",
-        f"{pb:.2f} Years"
+        f"{pb_dash:.2f} Years"
     )
 
     f4.metric(
         "NPV (20 Years)",
-        f"₹ {n:,.0f}"
+        f"₹ {n_dash:,.0f}"
     )
 
     st.divider()
 
-    fig3 = payback_plot()
-
+    # Generate visual payback curve map for dashboard interface
+    df_timeline_dash = generate_financial_timeline_dataframe(
+        initial_investment=cost_dash,
+        year_one_savings=savings_dash,
+        lifecycle_years=15,
+        discount_rate=0.08,
+        fuel_escalation=0.06,
+        annual_degradation=0.01,
+        opex_rate=0.02
+    )
+    
+    fig_dash_payback = go.Figure()
+    fig_dash_payback.add_shape(type="line", x0=0, y0=0, x1=15, y1=0, line=dict(color="#cbd5e1", width=2, dash="dash"))
+    fig_dash_payback.add_trace(go.Scatter(
+        x=df_timeline_dash["Year"], y=df_timeline_dash["Cumulative Cash Position (₹)"],
+        mode="lines+markers", name="Cumulative Cash Balance",
+        line=dict(color="#0284c7", width=4, shape="spline"), marker=dict(size=8)
+    ))
+    fig_dash_payback.update_layout(
+        xaxis_title="Years in Operation", yaxis_title="Net Project Value (₹)",
+        plot_bgcolor="#ffffff", height=400, margin=dict(l=20, r=20, t=20, b=20)
+    )
+    fig_dash_payback.update_yaxes(gridcolor="#f1f5f9")
+    
     st.plotly_chart(
-        fig3,
-        width='stretch',
+        fig_dash_payback,
+        use_container_width=True,
         key='dashboard_payback'
     )
 
@@ -305,21 +359,6 @@ with tabs[1]:
 
     st.header("Advanced Thermal Analysis & Proposal Metrics")
     st.markdown("---")
-
-    # 1. Execute the comprehensive simulation calculations
-    daily_plant_load, monthly_analytics_list = generate_proposal_analytics(
-        lpd=daily_water,
-        tin=tin,
-        tout=tout,
-        latitude=latitude,
-        eta0=eta0,
-        a1=a1,
-        a2=a2,
-        aperture_area=aperture_area
-    )
-    
-    # Generate DataFrame and explicitly ensure columns are typed properly
-    df_analytics = pd.DataFrame(monthly_analytics_list)
     
     # Safeguard calculations against empty lists/data structures
     if not df_analytics.empty:
@@ -358,30 +397,22 @@ with tabs[1]:
     fig_perf = make_subplots(specs=[[{"secondary_y": True}]])
     fig_perf.add_trace(
         go.Bar(
-            x=df_analytics["Month"],
-            y=df_analytics["Collector Yield (kWh/day)"],
-            name="Daily Thermal Yield (kWh)",
-            marker_color="#0284c7",
-            opacity=0.85
+            x=df_analytics["Month"], y=df_analytics["Collector Yield (kWh/day)"],
+            name="Daily Thermal Yield (kWh)", marker_color="#0284c7", opacity=0.85
         ),
         secondary_y=False
     )
     fig_perf.add_trace(
         go.Scatter(
-            x=df_analytics["Month"],
-            y=df_analytics["Solar Fraction (%)"],
-            name="Solar Fraction (%)",
-            mode="lines+markers",
-            line=dict(color="#16a34a", width=3)
+            x=df_analytics["Month"], y=df_analytics["Solar Fraction (%)"],
+            name="Solar Fraction (%)", mode="lines+markers", line=dict(color="#16a34a", width=3)
         ),
         secondary_y=True
     )
     fig_perf.update_layout(
         title="<b>Seasonal Energy Yield & Grid Independence Profile</b>",
         legend=dict(orientation="h", y=1.1, x=0.5, xanchor="center"),
-        plot_bgcolor="#ffffff",
-        height=400,
-        margin=dict(l=20, r=20, t=50, b=20)
+        plot_bgcolor="#ffffff", height=400, margin=dict(l=20, r=20, t=50, b=20)
     )
     fig_perf.update_yaxes(title_text="Daily Yield (kWh)", secondary_y=False, gridcolor="#f1f5f9")
     fig_perf.update_yaxes(title_text="Solar Fraction (%)", range=[0, 110], secondary_y=True, showgrid=False)
@@ -390,30 +421,22 @@ with tabs[1]:
     fig_save = make_subplots(specs=[[{"secondary_y": True}]])
     fig_save.add_trace(
         go.Bar(
-            x=df_analytics["Month"],
-            y=df_analytics["Fuel Saved (Liters/month)"],
-            name="Fossil Fuel Displaced (L)",
-            marker_color="#ea580c",
-            opacity=0.85
+            x=df_analytics["Month"], y=df_analytics["Fuel Saved (Liters/month)"],
+            name="Fossil Fuel Displaced (L)", marker_color="#ea580c", opacity=0.85
         ),
         secondary_y=False
     )
     fig_save.add_trace(
         go.Scatter(
-            x=df_analytics["Month"],
-            y=df_analytics["CO2 Mitigated (kg/month)"] / 1000.0,
-            name="Carbon Footprint Abated (Tons)",
-            mode="lines+markers",
-            line=dict(color="#047857", width=3, dash="dash")
+            x=df_analytics["Month"], y=df_analytics["CO2 Mitigated (kg/month)"] / 1000.0,
+            name="Carbon Footprint Abated (Tons)", mode="lines+markers", line=dict(color="#047857", width=3, dash="dash")
         ),
         secondary_y=True
     )
     fig_save.update_layout(
         title="<b>Monthly Operational Cost Shield & Carbon Offsets</b>",
         legend=dict(orientation="h", y=1.1, x=0.5, xanchor="center"),
-        plot_bgcolor="#ffffff",
-        height=400,
-        margin=dict(l=20, r=20, t=50, b=20)
+        plot_bgcolor="#ffffff", height=400, margin=dict(l=20, r=20, t=50, b=20)
     )
     fig_save.update_yaxes(title_text="Fuel Saved (Liters)", secondary_y=False, gridcolor="#f1f5f9")
     fig_save.update_yaxes(title_text="CO2 Saved (Metric Tons)", secondary_y=True, showgrid=False)
@@ -512,11 +535,11 @@ with tabs[3]:
     st.graphviz_chart(pid)
 
 # =====================================================
-# =====================================================
-# FINANCIAL TAB (UPGRADED INVESTMENT EVALUATION)
+# FINANCIAL TAB
 # =====================================================
 
 with tabs[4]:
+
     st.header("Financial Performance Analysis")
     st.markdown("This industrial investment model evaluates multi-year payback projections by tracking compound fuel cost inflation, ongoing maintenance expenses, and collector degradation.")
     st.markdown("---")
@@ -539,9 +562,6 @@ with tabs[4]:
         total_area=total_area, 
         collector_type=collector_type
     )
-    
-    # Extrapolate annual baseline generation from the seasonal analytics array
-    annual_energy_yield_sum_kwh = float(df_analytics["Collector Yield (kWh/day)"].sum() * 30.4)
     
     year_one_gross_savings = calculate_real_annual_savings(
         annual_energy_yield_kwh=annual_energy_yield_sum_kwh, 
@@ -572,23 +592,19 @@ with tabs[4]:
     
     metric_col1.metric(
         label="💰 Total Capital Required (CapEx)",
-        value=f"₹ {calculated_investment:,.0f}",
-        help="Includes base hardware, civil mounting foundations, logistics, and engineering commissioning costs."
+        value=f"₹ {calculated_investment:,.0f}"
     )
     metric_col2.metric(
         label="📉 Year 1 Net Cash Savings",
-        value=f"₹ {year_one_gross_savings:,.0f}",
-        help="Calculated directly from displaced fuel costs based on your process heat demands."
+        value=f"₹ {year_one_gross_savings:,.0f}"
     )
     metric_col3.metric(
         label="⏱️ Dynamic Payback Period",
-        value=f"{true_payback_period:.2f} Years",
-        help="The true time to break even, accounting for maintenance expenses and fuel cost inflation."
+        value=f"{true_payback_period:.2f} Years"
     )
     metric_col4.metric(
         label="📈 Net Present Value (20-Yr NPV)",
-        value=f"₹ {project_net_present_value:,.0f}",
-        help="The net present value of your long-term fuel savings over a 20-year lifespan, adjusted for inflation."
+        value=f"₹ {project_net_present_value:,.0f}"
     )
 
     st.markdown("---")
@@ -608,34 +624,22 @@ with tabs[4]:
     
     # Build a clean visual timeline plot using Plotly
     fig_payback_curve = go.Figure()
-    
-    # Breakeven Reference Horizon Line
-    fig_payback_curve.add_shape(
-        type="line", x0=0, y0=0, x1=15, y1=0,
-        line=dict(color="#cbd5e1", width=2, dash="dash")
-    )
-    
-    # Cumulative Cash Line Run
+    fig_payback_curve.add_shape(type="line", x0=0, y0=0, x1=15, y1=0, line=dict(color="#cbd5e1", width=2, dash="dash"))
     fig_payback_curve.add_trace(go.Scatter(
-        x=df_timeline["Year"],
-        y=df_timeline["Cumulative Cash Position (₹)"],
-        mode="lines+markers",
-        name="Cumulative Cash Balance",
-        line=dict(color="#10b981", width=4, shape="spline"),
-        marker=dict(size=8, color="#059669")
+        x=df_timeline["Year"], y=df_timeline["Cumulative Cash Position (₹)"],
+        mode="lines+markers", name="Cumulative Cash Balance",
+        line=dict(color="#10b981", width=4, shape="spline"), marker=dict(size=8, color="#059669")
     ))
     
     fig_payback_curve.update_layout(
-        xaxis_title="Years in Operation",
-        yaxis_title="Net Project Value (₹)",
-        plot_bgcolor="#ffffff",
-        height=450,
-        margin=dict(l=20, r=20, t=20, b=20)
+        xaxis_title="Years in Operation", yaxis_title="Net Project Value (₹)",
+        plot_bgcolor="#ffffff", height=450, margin=dict(l=20, r=20, t=20, b=20)
     )
     fig_payback_curve.update_yaxes(gridcolor="#f1f5f9")
     fig_payback_curve.update_xaxes(tickmode="linear", dtick=1)
     
     st.plotly_chart(fig_payback_curve, use_container_width=True, key='financial_tab_payback_render')
+
 # =====================================================
 # SYSTEM INTEGRATION DASHBOARD VIEW TAB MODULE
 # =====================================================
@@ -658,8 +662,6 @@ with tabs[5]:
     
     st.html(integration_blueprint)
 
-# =====================================================
-# =====================================================
 # =====================================================
 # INSTALLATION TAB (SIMPLIFIED LAYMAN-FRIENDLY VIEW)
 # =====================================================
@@ -695,25 +697,21 @@ with tabs[6]:
     # Loop through and build clean, collapsible dropdown info cards
     for idx, item in enumerate(installation_data):
         with st.container():
-            # First card stays open automatically so the page looks active
             with st.expander(f"**Step {idx+1}: {item['icon']} {item['step']}**", expanded=(idx == 0)):
-                
                 col_desc, col_checklist = st.columns([2, 1])
-                
                 with col_desc:
                     st.markdown("##### 📝 What we do:")
                     st.write(item["description"])
-                    
                     st.markdown("##### ✨ Why it matters:")
                     st.info(item["specs"])
-                
                 with col_checklist:
                     st.markdown("##### 🔍 Quality Checks:")
-                    # Generate dynamic interactive checkboxes for the customer
                     for check in item["checklist"]:
                         st.checkbox(check, key=f"layman_install_chk_{idx}_{hash(check)}")
             
         st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
+
+# =====================================================
 # LITERATURE TAB
 # =====================================================
 
