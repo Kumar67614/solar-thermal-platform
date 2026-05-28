@@ -336,31 +336,34 @@ with tabs[2]:
 
     st.header("Solar Field Layout")
 
-    pitch = spacing(
-        collector_height,
-        25,
-        latitude
-    )
+    #  NEW FUNCTIONAL STREAMLIT INTEGRATION FLOW
+# 1. Fetch parameters safely from your "Customer Inputs" sidebar widgets
+# (Matches your UI values: 5000 LPD, 25°C to 80°C target, etc.)
+selected_tilt = st.sidebar.slider("Collector Tilt Angle (°)", 0, 60, 30)
+selected_lat = st.sidebar.number_input("Project Latitude (°)", value=23.5)
 
-    cols = 5
+# 2. Derive the ideal anti-shading geometry properties on-the-fly
+winter_solstice_altitude = 90.0 - abs(selected_lat + 23.45)
+vertical_rise = panel_height * math.sin(math.radians(selected_tilt))
+panel_ground_footprint = panel_height * math.cos(math.radians(selected_tilt))
 
-    rows = int(np.ceil(collectors/cols))
+# Safe minimum spacing limit calculation to prevent row clipping
+min_shading_space = vertical_rise / math.tan(math.radians(winter_solstice_altitude))
+ideal_pitch_distance = panel_ground_footprint + min_shading_space + 0.5  # Includes 0.5m buffer
 
-    st.write(
-        f"Recommended Row Pitch = {pitch:.2f} m"
-    )
+# 3. Pass values directly to your updated responsive drawing engine
+fig = draw_layout(
+    rows=input_rows,
+    cols=input_cols,
+    width=panel_width,
+    height=panel_height,
+    pitch=ideal_pitch_distance,     # Automatically responsive pitch injection
+    tilt=selected_tilt,
+    latitude=selected_lat
+)
 
-    layout_fig = draw_layout(
-        rows,
-        cols,
-        collector_width,
-        collector_height,
-        pitch
-    )
-
-    st.pyplot(layout_fig)
-
-# =====================================================
+# 4. Render the clean layout to the user dashboard canvas
+st.pyplot(fig)# =====================================================
 # PID TAB
 # =====================================================
 
