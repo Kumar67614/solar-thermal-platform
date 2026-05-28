@@ -512,62 +512,130 @@ with tabs[3]:
     st.graphviz_chart(pid)
 
 # =====================================================
-# FINANCIAL TAB
+# =====================================================
+# FINANCIAL TAB (UPGRADED INVESTMENT EVALUATION)
 # =====================================================
 
 with tabs[4]:
+    st.header("Financial Performance Analysis")
+    st.markdown("This industrial investment model evaluates multi-year payback projections by tracking compound fuel cost inflation, ongoing maintenance expenses, and collector degradation.")
+    st.markdown("---")
 
-    st.header("Financial Analysis")
+    # Local Scenario Modeling Inputs
+    st.subheader("Financial Modeling Assumptions")
+    fin_col1, fin_col2, fin_col3 = st.columns(3)
+    
+    with fin_col1:
+        input_discount_rate = st.slider("Corporate Discount Rate (WACC %)", 4.0, 15.0, 8.5, step=0.5) / 100.0
+    with fin_col2:
+        input_fuel_inflation = st.slider("Expected Annual Fuel Inflation (%)", 0.0, 12.0, 6.0, step=0.5) / 100.0
+    with fin_col3:
+        input_maintenance_opex = st.slider("Annual Maintenance / OpEx (% of Capex)", 0.5, 5.0, 2.0, step=0.5) / 100.0
 
-    cost = project_cost(
-        total_area
+    st.markdown("---")
+
+    # Compute values using our new market-aligned engine formulas
+    calculated_investment = calculate_market_project_cost(
+        total_area=total_area, 
+        collector_type=collector_type
+    )
+    
+    # Extrapolate annual baseline generation from the seasonal analytics array
+    annual_energy_yield_sum_kwh = float(df_analytics["Collector Yield (kWh/day)"].sum() * 30.4)
+    
+    year_one_gross_savings = calculate_real_annual_savings(
+        annual_energy_yield_kwh=annual_energy_yield_sum_kwh, 
+        fuel_cost_per_kwh=fuel_cost
+    )
+    
+    true_payback_period = calculate_dynamic_payback(
+        initial_investment=calculated_investment,
+        year_one_savings=year_one_gross_savings,
+        fuel_escalation=input_fuel_inflation,
+        annual_degradation=0.01,
+        opex_rate=input_maintenance_opex
+    )
+    
+    project_net_present_value = calculate_comprehensive_npv(
+        initial_investment=calculated_investment,
+        year_one_savings=year_one_gross_savings,
+        lifecycle_years=20,
+        discount_rate=input_discount_rate,
+        fuel_escalation=input_fuel_inflation,
+        annual_degradation=0.01,
+        opex_rate=input_maintenance_opex
     )
 
-    savings = annual_savings(
-        load*300,
-        fuel_cost
+    # Display Executive KPIs
+    st.subheader("Investment Returns Metrics Summary")
+    metric_col1, metric_col2, metric_col3, metric_col4 = st.columns(4)
+    
+    metric_col1.metric(
+        label="💰 Total Capital Required (CapEx)",
+        value=f"₹ {calculated_investment:,.0f}",
+        help="Includes base hardware, civil mounting foundations, logistics, and engineering commissioning costs."
+    )
+    metric_col2.metric(
+        label="📉 Year 1 Net Cash Savings",
+        value=f"₹ {year_one_gross_savings:,.0f}",
+        help="Calculated directly from displaced fuel costs based on your process heat demands."
+    )
+    metric_col3.metric(
+        label="⏱️ Dynamic Payback Period",
+        value=f"{true_payback_period:.2f} Years",
+        help="The true time to break even, accounting for maintenance expenses and fuel cost inflation."
+    )
+    metric_col4.metric(
+        label="📈 Net Present Value (20-Yr NPV)",
+        value=f"₹ {project_net_present_value:,.0f}",
+        help="The net present value of your long-term fuel savings over a 20-year lifespan, adjusted for inflation."
     )
 
-    pb = payback(
-        cost,
-        savings
+    st.markdown("---")
+
+    # Render an Interactive Investment Cash Flow Chart
+    st.subheader("Projected Investment Cash Flow Matrix (Payback Curve)")
+    
+    df_timeline = generate_financial_timeline_dataframe(
+        initial_investment=calculated_investment,
+        year_one_savings=year_one_gross_savings,
+        lifecycle_years=15,
+        discount_rate=input_discount_rate,
+        fuel_escalation=input_fuel_inflation,
+        annual_degradation=0.01,
+        opex_rate=input_maintenance_opex
     )
-
-    n = npv(
-        cost,
-        savings,
-        20,
-        0.08
+    
+    # Build a clean visual timeline plot using Plotly
+    fig_payback_curve = go.Figure()
+    
+    # Breakeven Reference Horizon Line
+    fig_payback_curve.add_shape(
+        type="line", x0=0, y0=0, x1=15, y1=0,
+        line=dict(color="#cbd5e1", width=2, dash="dash")
     )
-
-    st.metric(
-        "Project Cost",
-        f"₹ {cost:,.0f}"
+    
+    # Cumulative Cash Line Run
+    fig_payback_curve.add_trace(go.Scatter(
+        x=df_timeline["Year"],
+        y=df_timeline["Cumulative Cash Position (₹)"],
+        mode="lines+markers",
+        name="Cumulative Cash Balance",
+        line=dict(color="#10b981", width=4, shape="spline"),
+        marker=dict(size=8, color="#059669")
+    ))
+    
+    fig_payback_curve.update_layout(
+        xaxis_title="Years in Operation",
+        yaxis_title="Net Project Value (₹)",
+        plot_bgcolor="#ffffff",
+        height=450,
+        margin=dict(l=20, r=20, t=20, b=20)
     )
-
-    st.metric(
-        "Annual Savings",
-        f"₹ {savings:,.0f}"
-    )
-
-    st.metric(
-        "Payback",
-        f"{pb:.2f} Years"
-    )
-
-    st.metric(
-        "NPV",
-        f"₹ {n:,.0f}"
-    )
-
-    fig3 = payback_plot()
-
-    st.plotly_chart(
-        fig3,
-        width='stretch',
-        key='financial_payback'
-    )
-
+    fig_payback_curve.update_yaxes(gridcolor="#f1f5f9")
+    fig_payback_curve.update_xaxes(tickmode="linear", dtick=1)
+    
+    st.plotly_chart(fig_payback_curve, use_container_width=True, key='financial_tab_payback_render')
 # =====================================================
 # SYSTEM INTEGRATION DASHBOARD VIEW TAB MODULE
 # =====================================================
