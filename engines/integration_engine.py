@@ -27,11 +27,11 @@ def recommendations(industry="Dairy", tout=80, daily_water=5000, total_flow=250)
     Generates high-end, visually striking HTML component spec blocks 
     tailored specifically for deployment within a web dashboard interface.
     
-    Replaces raw bullet lists with beautifully formatted, responsive enterprise cards.
+    Replaces boring bullet lists with structured, color-coded enterprise cards.
     """
     recommended_dn = calculate_pipe_diameter(total_flow)
     
-    # 1. VISUAL DESIGN TOKENS & CONTENT DICTIONARY
+    # 1. INDUSTRY DEFINITIONS & METRIC MAPPINGS
     specs = {
         "Dairy": {
             "theme_color": "#2E7D32",   # Deep Sanitary Green
@@ -42,7 +42,7 @@ def recommendations(industry="Dairy", tout=80, daily_water=5000, total_flow=250)
                     "title": "Plant Fluid Piping",
                     "badge": f"DN {recommended_dn} Standard",
                     "details": [
-                        f"Recommended Main Line Size: <b>DN {recommended_dn}</b> optimized to achieve a high-efficiency fluid scouring velocity of 1.0–1.5 m/s to completely eliminate organic sediment settling.",
+                        f"Recommended Main Line Size: <b>DN {recommended_dn}</b> optimized to achieve a fluid scouring velocity of 1.0–1.5 m/s to completely eliminate organic sediment settling.",
                         "Material Standard: <b>Food-Grade Stainless Steel (SS316)</b> ensuring zero risk of bacterial contamination or pitting across active pasteurization runs.",
                         "Piping Slope Strategy: Pre-install with a downward drainage pitch of at least <b>1:40</b> directly targeting process collection basins for effortless cleaning cycles.",
                         "Thermal Insulation: <b>50mm high-density mineral wool clad in a rugged aluminum protective shell</b> to eliminate heat radiation across plant floors."
@@ -97,7 +97,7 @@ def recommendations(industry="Dairy", tout=80, daily_water=5000, total_flow=250)
                     "title": "Plant Fluid Piping",
                     "badge": f"DN {recommended_dn} Heavy Wall",
                     "details": [
-                        f"Recommended Main Line Size: <b>DN {recommended_dn}</b> optimized to handle high-velocity batch discharge dumps without encountering pipeline water-hammer.",
+                        f"Recommended Main Line Size: <b>DN {recommended_dn}</b> optimized to handle high-volume batch discharge dumps without encountering pipeline water-hammer.",
                         "Material Standard: Heavy-duty <b>Carbon Steel or Ductile Iron</b> featuring a thick 5mm sacrificial corrosion margin to withstand abrasive raw water treatment values.",
                         "Thermal Insulation: <b>75mm asbestos-free silicate insulation</b> enclosed in dense protective canvas wrapping tailored for aggressive dye house room floors."
                     ]
@@ -118,6 +118,24 @@ def recommendations(industry="Dairy", tout=80, daily_water=5000, total_flow=250)
                         "Hardware Configuration: Heavy-duty <b>Shell & Tube Heat Exchanger</b> purpose-built to process high-fouling, raw fabric wastewater discharge streams.",
                         "Wetted Tubes Material: Deploys <b>Solid Titanium Tube Elements</b> providing defense against harsh dyes, caustic bleaching solutions, and fixing salts.",
                         "Direct Boiler Interface: Outfitted with built-in utility steam connection ports to quickly balance loop temperatures during extreme operational phases."
+                    ]
+                },
+                {
+                    "title": "Dye House Process Integration",
+                    "badge": "Multi-Zone Circuit",
+                    "details": [
+                        "Multi-Circuit Heat Zoning: Distributed piping headers run independent supply lines to provide varying process temperatures across different areas of the facility.",
+                        "Dye Vat Coupling: Direct thermal integration into individual dye vats using high-speed regulating control valves.",
+                        "Wastewater Energy Capture: Integrated heat exchangers harvest residual energy from hot wastewater dumps to preheat fresh incoming utility water."
+                    ]
+                },
+                {
+                    "title": "Automation & Safety Controls",
+                    "badge": "Batch Scheduler",
+                    "details": [
+                        "Production Scheduler Interface: Control software matches energy delivery to active batch schedules across the plant floors.",
+                        "Temperature Ramping Control: Automated control loops provide smooth temperature ramping curves (±2°C precision) for critical fabric dyeing runs.",
+                        "Pressure Constraints: Heavy pressure relief infrastructure caps line pressures at 4 to 6 bar."
                     ]
                 }
             ]
@@ -145,6 +163,33 @@ def recommendations(industry="Dairy", tout=80, daily_water=5000, total_flow=250)
                         "Sealing Elements: <b>Cleanroom-certified, non-degrading fluoropolymer gaskets</b> compliant with high-purity Water-For-Injection (WFI) streams.",
                         "Structural Integrity: High-strength configuration tested and rated for heavy-duty industrial processing limits up to <b>10 bar</b>."
                     ]
+                },
+                {
+                    "title": "Precision Instrumentation",
+                    "badge": "±0.1°C Calibrated",
+                    "details": [
+                        "Sensor Benchmarks: Double-calibrated <b>RTD sensor networks (accurate to ±0.1°C)</b> deployed at critical regulatory control nodes.",
+                        "Data Archival Automation: 24/7 digital data acquisition system logging compliance metrics for batch audit reviews.",
+                        "Alarm Management: Automated pressure sensors featuring hard-coded software limit triggers to catch line anomalies instantaneously."
+                    ]
+                },
+                {
+                    "title": "Plant Integration & Validation",
+                    "badge": "IQ/OQ/PQ Ready",
+                    "details": [
+                        "Validation Standards: Complete validation documentation pack featuring full <b>Installation, Operation, and Performance Qualification (IQ/OQ/PQ)</b> files.",
+                        "System Isolation: Built with clean three-way diversion valves to instantly isolate and loops if fluid temperatures step out of alignment.",
+                        "Sanitary Trapping: Features automatic sterile steam traps ensuring zero ambient back-siphoning vector risks."
+                    ]
+                },
+                {
+                    "title": "Automation & Safety Controls",
+                    "badge": "21 CFR Part 11",
+                    "details": [
+                        "Regulatory Software Stack: Advanced PLC controllers built fully compliant with <b>FDA 21 CFR Part 11 electronic data validation metrics</b>.",
+                        "Audit Tracking Automation: Tamper-proof internal logging loops record every configuration change made across the system.",
+                        "Deviation Logic: Auto-tripping logic flags instant warnings to plant managers if a processing run slips by more than 2°C."
+                    ]
                 }
             ]
         },
@@ -160,7 +205,7 @@ def recommendations(industry="Dairy", tout=80, daily_water=5000, total_flow=250)
                     "details": [
                         f"Recommended Main Line Size: <b>DN {recommended_dn}</b> precisely calculated to optimize flow velocity, balancing friction loss against required volume delivery.",
                         "Material Standard: <b>Heavy-gauge Carbon Steel or Hastelloy Alloys</b> protected with specialized internal anti-corrosion chemical linings.",
-                        "Pressure Bounds: All piping runs and connection couplings utilize industrial high-strength flanges rated for severe process pressures."
+                        "Pressure Bounds: All piping runs and connection couplings utilize industrial high-strength fittings rated for severe process pressures."
                     ]
                 },
                 {
@@ -168,7 +213,26 @@ def recommendations(industry="Dairy", tout=80, daily_water=5000, total_flow=250)
                     "badge": "Double-Wall Isolation",
                     "details": [
                         "Hardware Configuration: Fully isolated <b>Double-Wall Shell or Plate Exchanger</b> ensuring hazardous process media can never mix into storage lines.",
-                        "Wetted Tubes Material: Specialized <b>Inconel or Solid Titanium alloy sets</b> to withstand reactive, aggressive process chemistries."
+                        "Wetted Tubes Material: Specialized <b>Inconel or Solid Titanium alloy sets</b> to withstand reactive, aggressive process chemistries.",
+                        "Safety Infrastructure: Outfitted with hardware burst discs and pressure relief lines targeting containment sumps."
+                    ]
+                },
+                {
+                    "title": "Process Integration & Safety Zones",
+                    "badge": "ATEX Compliant",
+                    "details": [
+                        "Multi-Tiered Thermal Zoning: Independent flow control circuits regulate temperature profiles across sequential reactor stages.",
+                        "Explosion-Proof Compliance: All localized wiring, motors, and instrumentation meet strict <b>ATEX/IECEx explosion-proof specifications</b>.",
+                        "Secondary Safety Containment: Process pipelines run inside protective secondary outer sleeves to manage line leaks or breaks safely."
+                    ]
+                },
+                {
+                    "title": "Automation & Safety Controls",
+                    "badge": "Ramp/Soak Profiles",
+                    "details": [
+                        "Advanced Controls Strategy: Process controllers deploy automated heating and cooling curves to manage reaction loops safely.",
+                        "Fault Tolerance Interlocks: Automated bypass valves trigger immediately if a pump fails, maintaining safe internal temperature balances.",
+                        "Real-time Alarm Management: Distributed Control System (DCS) links provide instantaneous notifications on tracking variances."
                     ]
                 }
             ]
@@ -193,7 +257,26 @@ def recommendations(industry="Dairy", tout=80, daily_water=5000, total_flow=250)
                     "badge": "FDA-Approved Plate",
                     "details": [
                         "Hardware Geometry: <b>Sanitary Frame Heat Exchanger</b> with an ultra-smooth plate face profile to eliminate bacterial anchoring vectors.",
-                        "Sealing Elements: <b>FDA-certified, non-porous food-grade silicone or EPDM gaskets</b> designed for continuous clean operation."
+                        "Sealing Elements: <b>FDA-certified, non-porous food-grade silicone or EPDM gaskets</b> designed for continuous clean operation.",
+                        "Passivated Surfaces: External structural surfaces receive an acid-bath chemical passivation layout to ensure dynamic wear resilience."
+                    ]
+                },
+                {
+                    "title": "Plant Integration & Food Safety",
+                    "badge": "HACCP Data Logging",
+                    "details": [
+                        "Direct Production Splicing: Solar lines connect smoothly to pre-heating stations for jacketed cooking kettles, cleanups, and boiler feed lines.",
+                        "Loop Isolation Strategy: Dual-loop barriers prevent solar storage fluids from ever interacting with food product streams.",
+                        "HACCP Data Interface: Built-in data loggers continuously record processing line temperatures to fulfill critical food safety audit guidelines."
+                    ]
+                },
+                {
+                    "title": "Automation & Safety Controls",
+                    "badge": f"Trip: {tout}°C",
+                    "details": [
+                        "Daily Sanitization Cycles: Control systems schedule automatic thermal disinfection sequences during down-time hours.",
+                        "Boiler Integration Logic: Automatic control systems switch to utility gas boilers when solar storage reserves empty below the target value.",
+                        "High-Limit Thermal Trips: Safety systems isolate the solar field if delivery lines exceed the design threshold of <b>{tout}°C</b>."
                     ]
                 }
             ]
