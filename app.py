@@ -296,15 +296,15 @@ with tabs[0]:
     )
 
 # =====================================================
-# THERMAL TAB (CORRECTED LINE 309 ENGINE MATRIX)
+# =====================================================
+# THERMAL TAB (EXECUTIVE VISUALIZATION DISPLAY)
 # =====================================================
 
 with tabs[1]:
-
     st.header("Advanced Thermal Analysis & Proposal Metrics")
     st.markdown("---")
 
-    # Run the comprehensive commercial proposal simulation loop
+    # 1. Execute the comprehensive simulation calculations
     daily_plant_load, monthly_analytics_list = generate_proposal_analytics(
         lpd=daily_water,
         tin=tin,
@@ -316,10 +316,9 @@ with tabs[1]:
         aperture_area=aperture_area
     )
     
-    # Store analytics results as a Pandas DataFrame
     df_analytics = pd.DataFrame(monthly_analytics_list)
 
-    # Executive Value-Add Metrics Section
+    # 2. Key Performance Metric Highlights
     st.subheader("Annualized Projected Savings Summary")
     summary_col1, summary_col2, summary_col3 = st.columns(3)
     
@@ -342,8 +341,23 @@ with tabs[1]:
     
     st.markdown("---")
 
-    # Interactive Seasonality Grid
-    st.subheader("Seasonal Performance Matrix (Month-by-Month Simulation)")
+    # 3. Interactive Graphical Proposal Visualizations (Side-by-Side Panels)
+    st.subheader("Executive Proposal Performance Dashboards")
+    graph_col1, graph_col2 = st.columns(2)
+    
+    # Generate presentation charts from our upgraded plotting module
+    fig_perf, fig_save = create_proposal_plots(df_analytics)
+    
+    with graph_col1:
+        st.plotly_chart(fig_perf, use_container_width=True, key='proposal_seasonal_performance')
+        
+    with graph_col2:
+        st.plotly_chart(fig_save, use_container_width=True, key='proposal_financial_sustainability')
+
+    st.markdown("---")
+
+    # 4. Verification Data Grid
+    st.subheader("Seasonal Performance Matrix (Month-by-Month Simulation Verification)")
     st.dataframe(
         df_analytics,
         column_config={
@@ -357,39 +371,6 @@ with tabs[1]:
         hide_index=True,
         use_container_width=True
     )
-
-    st.markdown("---")
-
-    # Chart Area Block
-    st.subheader("Engineering Performance Curves")
-    chart_col1, chart_col2 = st.columns(2)
-
-    with chart_col1:
-        st.markdown("**Collector Thermal Efficiency Profile**")
-        fig_efficiency = efficiency_plot(
-            eta0,
-            a1,
-            a2,
-            irradiance
-        )
-        st.plotly_chart(
-            fig_efficiency,
-            use_container_width=True,
-            key='proposal_efficiency_curve'
-        )
-
-    with chart_col2:
-        st.markdown("**Diurnal Energy Generation Profile (Clear vs. Cloudy)**")
-        hourly_data = simulate_diurnal_curve(tin, tout, ambient, irradiance)
-        df_hourly = pd.DataFrame(hourly_data)
-        
-        st.area_chart(
-            df_hourly, 
-            x="Hour", 
-            y="Instantaneous Output (W/m²)", 
-            color="#0284c7"
-        )
-
 # =====================================================
 # LAYOUT TAB
 # =====================================================
