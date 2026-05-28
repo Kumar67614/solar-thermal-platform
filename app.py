@@ -15,7 +15,7 @@ from engines.installation_engine import *
 from engines.literature_engine import *
 from engines.hydraulic_engine import *
 
-# Explicitly forcing fresh registration of core engine components
+# Register updated engine functions
 from engines.thermal_engine import generate_proposal_analytics, simulate_diurnal_curve, collector_efficiency
 from engines.financial_engine import (
     calculate_market_project_cost,
@@ -175,7 +175,7 @@ tabs = st.tabs([
 ])
 
 # =====================================================
-# TAB 0: UPGRADED PILOT DASHBOARD VIEW
+# TAB 0: PILOT DASHBOARD VIEW
 # =====================================================
 with tabs[0]:
     st.title("Industrial Solar Thermal Proposal Platform")
@@ -190,15 +190,15 @@ with tabs[0]:
     c3.metric("Total Field Gross Footprint", f"{total_area:.1f} m²")
     c4.metric("Design Hydraulic Loop Flow", f"{total_flow:.1f} LPH")
 
-    # Row 2: Financial Payback Sizing KPIs
+    # Row 2: Financial Payback Sizing KPIs with corrected rates
     st.subheader("💰 Investment Returns Summary")
     f1, f2, f3, f4 = st.columns(4)
     
     cost_dash = calculate_market_project_cost(total_area=total_area, collector_type=collector_type)
     annual_energy_yield_sum_kwh = float(df_analytics["Collector Yield (kWh/day)"].sum() * 30.4)
     savings_dash = calculate_real_annual_savings(annual_energy_yield_kwh=annual_energy_yield_sum_kwh, fuel_cost_per_kwh=fuel_cost)
-    pb_dash = calculate_dynamic_payback(initial_investment=cost_dash, year_one_savings=savings_dash, fuel_escalation=0.06, opex_rate=0.02)
-    n_dash = calculate_comprehensive_npv(initial_investment=cost_dash, year_one_savings=savings_dash, lifecycle_years=20, discount_rate=0.08, fuel_escalation=0.06, opex_rate=0.02)
+    pb_dash = calculate_dynamic_payback(initial_investment=cost_dash, year_one_savings=savings_dash, fuel_escalation=0.06, opex_rate=0.015)
+    n_dash = calculate_comprehensive_npv(initial_investment=cost_dash, year_one_savings=savings_dash, lifecycle_years=20, discount_rate=0.08, fuel_escalation=0.06, opex_rate=0.015)
 
     f1.metric("Estimated Project Cost (CapEx)", f"₹ {cost_dash:,.0f}")
     f2.metric("Year 1 Fuel Displaced Savings", f"₹ {savings_dash:,.0f}")
@@ -207,28 +207,25 @@ with tabs[0]:
 
     st.markdown("---")
 
-    # Row 3: Advanced Graphical Visualizations (HWB Efficiency Plot & Payback Curve)
+    # Row 3: HWB Efficiency Plot & Payback Curve
     st.subheader("📊 Performance Analytics & Investment Projections")
     dash_graph_col1, dash_graph_col2 = st.columns(2)
 
     with dash_graph_col1:
         # Generate the dynamic HWB Performance Curve
-        # Formula: η = η0 - a1*(ΔT/G) - a2*(ΔT^2/G)
         param_x_range = np.linspace(0.0, 0.12, 100)
-        efficiency_curve = eta0 - (a1 * param_x_range) - (a2 * (param_x_range ** 2) * irradiance / 1000.0) # Adjusted scaling
+        efficiency_curve = eta0 - (a1 * param_x_range) - (a2 * (param_x_range ** 2) * irradiance / 1000.0)
         efficiency_curve = np.clip(efficiency_curve, 0, 1) * 100.0
         
         current_x_point = (tm - ambient) / irradiance
         current_y_point = eta_operational * 100.0
 
         fig_hwb = go.Figure()
-        # Full Curve
         fig_hwb.add_trace(go.Scatter(
             x=param_x_range, y=efficiency_curve,
             mode='lines', name='HWB Characteristic Curve',
             line=dict(color='#0284c7', width=3)
         ))
-        # Active Operating Point Dot
         fig_hwb.add_trace(go.Scatter(
             x=[current_x_point], y=[current_y_point],
             mode='markers', name='Active Operating Point',
@@ -247,16 +244,13 @@ with tabs[0]:
         st.plotly_chart(fig_hwb, use_container_width=True, key='dashboard_hwb_curve')
 
     with dash_graph_col2:
-        # Dynamic Payback Break-even Timeline Graph
         df_timeline_dash = generate_financial_timeline_dataframe(
             initial_investment=cost_dash, year_one_savings=savings_dash,
-            lifecycle_years=15, discount_rate=0.08, fuel_escalation=0.06, opex_rate=0.02
+            lifecycle_years=15, discount_rate=0.08, fuel_escalation=0.06, opex_rate=0.015
         )
         
         fig_dash_payback = go.Figure()
-        # Break-even zero line boundary
         fig_dash_payback.add_shape(type="line", x0=0, y0=0, x1=15, y1=0, line=dict(color="#cbd5e1", width=2, dash="dash"))
-        # Payback track line
         fig_dash_payback.add_trace(go.Scatter(
             x=df_timeline_dash["Year"], y=df_timeline_dash["Cumulative Cash Position (₹)"],
             mode="lines+markers", name="Cumulative Cash Balance",
@@ -274,7 +268,7 @@ with tabs[0]:
         st.plotly_chart(fig_dash_payback, use_container_width=True, key='dashboard_payback_curve')
 
 # =====================================================
-# TAB 1: THERMAL DISPLACEMENT PERFORMANCE MODULE
+# TAB 1: THERMAL ANALYSIS MODULE
 # =====================================================
 with tabs[1]:
     st.header("Advanced Thermal Analysis & Proposal Metrics")
@@ -295,7 +289,6 @@ with tabs[1]:
 
     graph_col1, graph_col2 = st.columns(2)
     
-    # Chart 1: Energy Yield vs Solar Fraction
     fig_perf = make_subplots(specs=[[{"secondary_y": True}]])
     fig_perf.add_trace(go.Bar(x=df_analytics["Month"], y=df_analytics["Collector Yield (kWh/day)"], name="Daily Thermal Yield (kWh)", marker_color="#0284c7", opacity=0.85), secondary_y=False)
     fig_perf.add_trace(go.Scatter(x=df_analytics["Month"], y=df_analytics["Solar Fraction (%)"], name="Solar Fraction (%)", mode="lines+markers", line=dict(color="#16a34a", width=3)), secondary_y=True)
@@ -303,7 +296,6 @@ with tabs[1]:
     fig_perf.update_yaxes(title_text="Daily Yield (kWh)", secondary_y=False, gridcolor="#f1f5f9")
     fig_perf.update_yaxes(title_text="Solar Fraction (%)", range=[0, 110], secondary_y=True, showgrid=False)
 
-    # Chart 2: Fuel Saved vs CO2 Prevented
     fig_save = make_subplots(specs=[[{"secondary_y": True}]])
     fig_save.add_trace(go.Bar(x=df_analytics["Month"], y=df_analytics["Fuel Saved (Liters/month)"], name="Fossil Fuel Displaced (L)", marker_color="#ea580c", opacity=0.85), secondary_y=False)
     fig_save.add_trace(go.Scatter(x=df_analytics["Month"], y=df_analytics["CO2 Mitigated (kg/month)"] / 1000.0, name="Carbon Footprint Abated (Tons)", mode="lines+markers", line=dict(color="#047857", width=3, dash="dash")), secondary_y=True)
@@ -353,7 +345,7 @@ with tabs[4]:
     fin_col1, fin_col2, fin_col3 = st.columns(3)
     with fin_col1: input_discount_rate = st.slider("Corporate Discount Rate (WACC %)", 4.0, 15.0, 8.5) / 100.0
     with fin_col2: input_fuel_inflation = st.slider("Expected Annual Fuel Inflation (%)", 0.0, 12.0, 6.0) / 100.0
-    with fin_col3: input_maintenance_opex = st.slider("Annual Maintenance / OpEx (% of Capex)", 0.5, 5.0, 2.0) / 100.0
+    with fin_col3: input_maintenance_opex = st.slider("Annual Maintenance / OpEx (% of Capex)", 0.5, 5.0, 1.5) / 100.0
 
     calculated_investment = calculate_market_project_cost(total_area=total_area, collector_type=collector_type)
     year_one_gross_savings = calculate_real_annual_savings(annual_energy_yield_kwh=annual_energy_yield_sum_kwh, fuel_cost_per_kwh=fuel_cost)
@@ -374,7 +366,7 @@ with tabs[4]:
     st.plotly_chart(fig_payback_curve, use_container_width=True, key='financial_tab_payback_render')
 
 # =====================================================
-# TAB 5: THERMOGRAPHIC PROCESS INTEGRATION
+# TAB 5: PROCESS INTEGRATION
 # =====================================================
 with tabs[5]:
     st.header("Real-Time System Integration Blueprint")
@@ -382,7 +374,7 @@ with tabs[5]:
     st.html(integration_blueprint)
 
 # =====================================================
-# TAB 6: ON-SITE DEPLOYMENT WORKFLOW PROCEDURES
+# TAB 6: INSTALLATION WORKFLOW PROCEDURES
 # =====================================================
 with tabs[6]:
     st.header("Step-by-Step System Installation Guide")
@@ -418,7 +410,7 @@ with tabs[6]:
         st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
 
 # =====================================================
-# TAB 7: ACADEMIC ACQUISITIONS AND RESEARCH LINKS
+# TAB 7: LITERATURE SURVEY References
 # =====================================================
 with tabs[7]:
     st.header("Literature Survey & Engineering Standards Reference List")
