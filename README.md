@@ -22,5 +22,3 @@ This repository contains a Streamlit application for solar thermal analysis.
 - Keep the virtual environment folders (`.venv`, `venv`) out of version control.
 - The `requirements.txt` file lists the dependencies used by the project.
 - Use the `Solar analysis` folder for the data files and analysis inputs.
-
-abhay
