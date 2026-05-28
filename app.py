@@ -448,26 +448,26 @@ with tabs[4]:
     )
 
 # =====================================================
-# INTEGRATION TAB
+# INTEGRATION TAB VIEW MODULE
 # =====================================================
 
 with tabs[5]:
     st.header("System Integration & Requirements")
     st.info(f"Detailed integration specifications for **{industry}** industry applications.")
     
-    # Generate the highly detailed product proposal view layout
+    # Generate the highly pictorial product blueprint view layout
     proposal_view = recommendations(
         industry=industry,
         tout=tout,
-        tinlet=inlet_temp if 'inlet_temp' in locals() else 25,       # Mapped to sidebar widget
-        tambient=ambient_temp if 'ambient_temp' in locals() else 30, # Mapped to sidebar widget
-        daily_water=daily_water,
-        total_flow=total_flow
+        tinlet=inlet_temp if 'inlet_temp' in locals() else 25,       # Links to 'Inlet Temperature' slider
+        tambient=ambient_temp if 'ambient_temp' in locals() else 30, # Links to 'Ambient Temperature' slider
+        daily_water=daily_water,                                     # Links to LPD input
+        total_flow=total_flow                                        # Links to active LPH calculation flow rate
     )
 
-    # Render the structured HTML components onto the user interface screen
+    # Render the structured HTML components onto the screen layout
     st.html(proposal_view)
-# =====================================================
+    # =====================================================
 # INSTALLATION TAB
 # =====================================================
 
