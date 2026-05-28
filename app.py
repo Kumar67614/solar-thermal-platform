@@ -30,10 +30,10 @@ from engines.financial_engine import (
 # =====================================================
 # PREMIUM HIGH-RESOLUTION PDF COMPILER FUNCTION
 # =====================================================
-def compile_proposal_pdf_document(industry, load, collectors, total_area, total_flow, cost, savings, payback, npv_val, collector_type):
+def compile_proposal_pdf_document(industry, load, collectors, total_area, total_flow, cost, savings, payback, npv_val, collector_type, rows, cols):
     """
     Generates a beautifully styled, print-ready layout.
-    Injects data metrics from all major tabs into a clean binary buffer stream.
+    Injects realistic data metrics from all major tabs into a clean binary buffer stream.
     """
     html_template = f"""
     <!DOCTYPE html>
@@ -56,7 +56,6 @@ def compile_proposal_pdf_document(industry, load, collectors, total_area, total_
             .header h1 {{ margin: 0; font-size: 22px; font-weight: 700; }}
             .header p {{ margin: 5px 0 0 0; color: #38bdf8; font-size: 13px; }}
             h2 {{ color: #0284c7; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; margin-top: 25px; page-break-after: avoid; }}
-            h3 {{ color: #475569; font-size: 12px; margin-top: 15px; margin-bottom: 5px; }}
             table {{ width: 100%; border-collapse: collapse; margin-top: 12px; margin-bottom: 20px; }}
             th {{ background-color: #f8fafc; color: #475569; text-align: left; padding: 8px 10px; font-size: 12px; border-bottom: 2px solid #cbd5e1; }}
             td {{ padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 12px; }}
@@ -74,7 +73,7 @@ def compile_proposal_pdf_document(industry, load, collectors, total_area, total_
         <h2>1. Executive Application Profile</h2>
         <p>This automated industrial proposal document details the thermodynamic capacity models, field array layouts, and lifecycle returns configured for integration at the <strong>{industry}</strong> plant facility.</p>
         
-        <h2>2. Technical Design & Sizing Framework</h2>
+        <h2>2. Technical Design & Hydraulic Sizing Framework</h2>
         <table>
             <thead>
                 <tr><th>Design Sizing Parameter</th><th>Calculated Specification Target</th></tr>
@@ -82,9 +81,9 @@ def compile_proposal_pdf_document(industry, load, collectors, total_area, total_
             <tbody>
                 <tr><td>Calculated Utility Process Thermal Load</td><td><strong>{load:.1f} kWh / Day</strong></td></tr>
                 <tr><td>Selected Collector Technology Matrix</td><td><strong>{collector_type} Array</strong></td></tr>
-                <tr><td>Required Solar Collector Modules Count</td><td><strong>{collectors} Units</strong></td></tr>
+                <tr><td>Required Solar Collector Modules Count</td><td><strong>{collectors} Units ({rows} Rows × {cols} Columns)</strong></td></tr>
                 <tr><td>Total Field Footprint Gross Area</td><td><strong>{total_area:.1f} m²</strong></td></tr>
-                <tr><td>Design Hydraulic Primary Loop Flow</td><td><strong>{total_flow:.1f} LPH</strong></td></tr>
+                <tr><td>Balanced Design Loop Flow Rate (Parallel)</td><td><strong>{total_flow:.1f} LPH (Balanced Array Optimization)</strong></td></tr>
             </tbody>
         </table>
 
@@ -105,21 +104,19 @@ def compile_proposal_pdf_document(industry, load, collectors, total_area, total_
         <div class="list-item"><strong>• Site Alignment Groundwork:</strong> Anchor racking tracks safely into structural roof beams using laser transit lines.</div>
         <div class="list-item"><strong>• Module Fixed Tilt Assembly:</strong> Clamp panels coplanarly to distribute wind and structural loads evenly.</div>
         <div class="list-item"><strong>• Pressure Integrity Audit:</strong> Perform an on-site hydrostatic test by holding the water loop at 1.5x design pressure for 24 hours to confirm leak-free plumbing.</div>
-        <div class="list-item"><strong>• Loss Shield Insulation:</strong> Wrap manifolds in mineral wool jackets under aluminum covers to keep the hot water hot.</div>
+        <div class="list-item"><strong>• Loss Shield Insulation:</strong> Wrap manifolds in mineral wool jackets under aluminum covers to preserve utility heat.</div>
 
         <div class="highlight-box">
-            <p>✔ Sizing & Accuracy Verification: This configuration applies volume discounts via step-down pricing brackets to maintain realistic capital budgeting goals.</p>
+            <p>✔ Sizing & Accuracy Verification: This configuration applies volume discounts via step-down pricing brackets to maintain realistic capital budgeting goals and uses parallel piping layout equations to prevent high pressure drops and excessive flow rates.</p>
         </div>
     </body>
     </html>
     """
     
-    # WeasyPrint converts our complete multi-tab HTML framework into a real downloadable PDF binary stream
     try:
         from weasyprint import HTML
         return HTML(string=html_template).write_pdf()
     except Exception:
-        # Secure string byte buffer fallback if layout engine handles separate local print hooks
         return bytes(html_template, 'utf-8')
 
 
@@ -245,8 +242,12 @@ daily_output = (instantaneous_output_w * peak_hours) / 1000.0
 collectors = collectors_required(load, daily_output)
 total_area = collectors * gross_area
 
-# Hydraulic parameters
-total_flow = collectors * flow_per_collector
+# Calculate structural layout parameters early to correct the primary flow loop calculations
+calculated_rows = max(1, int(math.ceil(math.sqrt(collectors) / 2)))
+calculated_cols = max(1, int(math.ceil(collectors / calculated_rows)))
+
+# FIX: Balances total loop flow based on parallel rows configuration to prevent flooding LPH targets
+total_flow = calculated_rows * flow_per_collector
 velocity = pipe_velocity(total_flow)
 re = reynolds_number(velocity)
 head = pump_head(total_flow)
@@ -275,7 +276,7 @@ n_dash = calculate_comprehensive_npv(initial_investment=cost_dash, year_one_savi
 pdf_data_buffer = compile_proposal_pdf_document(
     industry=industry, load=load, collectors=collectors, total_area=total_area, 
     total_flow=total_flow, cost=cost_dash, savings=savings_dash, payback=pb_dash, 
-    npv_val=n_dash, collector_type=collector_type
+    npv_val=n_dash, collector_type=collector_type, rows=calculated_rows, cols=calculated_cols
 )
 st.sidebar.markdown("---")
 st.sidebar.download_button(
@@ -314,7 +315,7 @@ with tabs[0]:
     c1.metric("Calculated Process Load", f"{load:.1f} kWh / Day")
     c2.metric("Required Modules Count", f"{collectors} Units")
     c3.metric("Total Field Gross Footprint", f"{total_area:.1f} m²")
-    c4.metric("Design Hydraulic Loop Flow", f"{total_flow:.1f} LPH")
+    c4.metric("Design Hydraulic Loop Flow", f"{total_flow:.1f} LPH (Balanced Parallel Loop)")
 
     # Row 2: Financial Payback Sizing KPIs with corrected rates
     st.subheader("💰 Investment Returns Summary")
@@ -332,7 +333,6 @@ with tabs[0]:
     dash_graph_col1, dash_graph_col2 = st.columns(2)
 
     with dash_graph_col1:
-        # Generate the dynamic HWB Performance Curve
         param_x_range = np.linspace(0.0, 0.12, 100)
         efficiency_curve = eta0 - (a1 * param_x_range) - (a2 * (param_x_range ** 2) * irradiance / 1000.0)
         efficiency_curve = np.clip(efficiency_curve, 0, 1) * 100.0
@@ -436,8 +436,8 @@ with tabs[1]:
 with tabs[2]:
     st.header("Solar Field Layout Plan")
     col_ui1, col_ui2, col_ui3 = st.columns(3)
-    with col_ui1: input_rows = st.number_input("Number of Rows Layout", min_value=1, max_value=20, value=max(1, int(math.ceil(math.sqrt(collectors) / 2))))
-    with col_ui2: input_cols = st.number_input("Collectors per Row (Columns Layout)", min_value=1, max_value=50, value=max(1, int(math.ceil(collectors / input_rows))))
+    with col_ui1: input_rows = st.number_input("Number of Rows Layout", min_value=1, max_value=20, value=int(calculated_rows))
+    with col_ui2: input_cols = st.number_input("Collectors per Row (Columns Layout)", min_value=1, max_value=50, value=int(calculated_cols))
     with col_ui3: selected_tilt = st.slider("Collector Frame Tilt Angle (°)", 0, 60, 30)
 
     winter_solstice_altitude = 90.0 - abs(latitude + 23.45)
@@ -500,15 +500,14 @@ with tabs[6]:
     st.header("Step-by-Step System Installation Guide")
     flowchart_html = """
     <div style="background-color: #f8fafc; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; margin-bottom: 25px;">
-        <span style="font-weight: bold; color: #0284c7;">1. Marking Spots</span> ➔ 
-        <span style="font-weight: bold; color: #0284c7;">2. Building Racks</span> ➔ 
-        <span style="font-weight: bold; color: #0284c7;">3. Mounting Panels</span> ➔ 
-        <span style="font-weight: bold; color: #0284c7;">4. Connecting Pipes</span>
+        <span style="font-weight: bold; color: #0284c7;">1. Foundation Marking</span> ➔ 
+        <span style="font-weight: bold; color: #0284c7;">2. Structure Erection</span> ➔ 
+        <span style="font-weight: bold; color: #0284c7;">3. Collector Mounting</span> ➔ 
+        <span style="font-weight: bold; color: #0284c7;">4. Hydraulic Piping</span>
         <br><br>
-        <span style="font-weight: bold; color: #16a34a;">8. System Live!</span> 🮪 
-        <span style="font-weight: bold; color: #475569;">7. Wiring Brains</span> 🮪 
-        <span style="font-weight: bold; color: #475569;">6. Pipe Jackets</span> 🮪 
-        <span style="font-weight: bold; color: #ea580c;">5. Leak Testing</span>
+        <span style="font-weight: bold; color: #16a34a;">7. Electrical Integration</span> 🮪 
+        <span style="font-weight: bold; color: #475569;">6. Insulation</span> 🮪 
+        <span style="font-weight: bold; color: #ea580c;">5. Pressure Testing</span>
     </div>
     """
     st.html(flowchart_html)
