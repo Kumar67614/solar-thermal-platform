@@ -1,0 +1,11 @@
+# Add project dependencies here
+streamlit
+numpy
+pandas
+matplotlib
+plotly
+graphviz
+scipy
+Pillow
+reportlab
+networkx
