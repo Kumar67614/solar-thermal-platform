@@ -591,18 +591,40 @@ with tabs[5]:
     st.html(integration_blueprint)
 
 # =====================================================
-# INSTALLATION TAB
+# =====================================================
+# INSTALLATION TAB (DETAILED INDUSTRIAL SPECIFICATIONS)
 # =====================================================
 
 with tabs[6]:
+    st.header("Industrial Field Installation Blueprint & Compliance Roadmap")
+    st.markdown("This section details the formal engineering steps, safety milestones, and quality control metrics required to successfully commission the solar thermal system at the facility.")
+    st.markdown("---")
 
-    st.header("Installation Procedure")
+    # Pull the expanded data dictionary from our upgraded engine file
+    installation_data = installation_steps()
 
-    steps = installation_steps()
-
-    for i,s in enumerate(steps):
-
-        st.write(f"{i+1}. {s}")
+    # Loop through the comprehensive dataset and construct clean interface cards
+    for idx, item in enumerate(installation_data):
+        with st.container():
+            # Use an expander for clean layout, showing step names as headers
+            with st.expander(f"**Step {idx+1}: {item['icon']} {item['step']}**", expanded=(idx==0)):
+                
+                col_desc, col_checklist = st.columns([2, 1])
+                
+                with col_desc:
+                    st.markdown("##### 📝 Procedural Description")
+                    st.write(item["description"])
+                    
+                    st.markdown("##### ⚙️ Technical Tolerance & Engineering Specs")
+                    st.info(item["specs"])
+                
+                with col_checklist:
+                    st.markdown("##### 🔍 Quality Sign-off Checklist")
+                    # Render interactive validation checklists for on-site execution simulation
+                    for check in item["checklist"]:
+                        st.checkbox(check, key=f"install_chk_{idx}_{hash(check)}")
+            
+        st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
 
 # =====================================================
 # LITERATURE TAB
