@@ -315,24 +315,16 @@ with tabs[5]:
     st.header("System Integration & Requirements")
     st.info(f"Detailed integration specifications for **{industry}** industry applications.")
     
-    rec = recommendations(
+    # 1. Fetch the completely redesigned premium HTML string
+    rec_html = recommendations(
         industry=industry,
         tout=tout,
         daily_water=daily_water,
         total_flow=total_flow
     )
 
-    current_section = None
-    for item in rec:
-        if item.startswith("###"):
-            if current_section is not None:
-                st.divider()
-            st.subheader(item.replace("###", "").strip())
-            current_section = item
-        elif item.startswith("•") or item.startswith("*"):
-            st.write(item)
-
-# =====================================================
+    # 2. Render the responsive HTML component directly onto the page layout
+    st.html(rec_html)# =====================================================
 # INSTALLATION TAB
 # =====================================================
 
