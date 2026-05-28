@@ -1,153 +1,3 @@
-def recommendations(industry="Dairy", tout=80, daily_water=5000, total_flow=250):
-    """
-    Generates tailored industrial integration blueprints.
-    Rephrased to clearly explain the business and mechanical justification for each component
-    so non-technical stakeholders can easily follow the integration requirements.
-    """
-    
-    # Calculate an accurate process velocity line diameter based on flow rate
-    recommended_dn = calculate_pipe_diameter(total_flow)
-    
-    recommendations_dict = {
-        "Dairy": {
-            "Plant Fluid Piping": [
-                f"Recommended Main Line Size: **DN {recommended_dn}** (Optimized to maintain a fluid velocity of 1.0–1.5 m/s, preventing sediment settling).",
-                "Material Standard: **Food-Grade Stainless Steel (SS316)** to prevent bacterial contamination and maintain pasteurization sanitation standards.",
-                "Piping Slope Strategy: Install with a downward slope of at least **1:40** toward the drainage basins to ensure easy fluid removal during cleaning.",
-                "Thermal Insulation: **50mm high-density mineral wool clad in protective rugged aluminum sheet metal** to ensure zero heat leakage across unconditioned plant floors."
-            ],
-            "Thermal Heat Exchanger System": [
-                "Hardware Type: **Sanitary Plate Heat Exchanger (PHE)** configured with a 50-to-100 plate stack depending on final operational pressure drops.",
-                "Wetted Plates Material: **High-corrosion resistant AISI 304 Stainless Steel** matching process water purity rules.",
-                "Sealing Gaskets: **Sanitary-grade EPDM rubber seals** capable of withstand constant thermal cycles without drying or cracking.",
-                "Hygienic Geometry: Designed with an ultra-smooth profile (crevice depths below 100 microns) to prevent active milk fat or organic buildup."
-            ],
-            "Plant Integration & Thermal Re-use": [
-                "Clean-In-Place (CIP) Interface: Seamlessly connects directly to the wash lines, utilizing solar energy to heat raw cleaning water to the needed temperature.",
-                "Sanitary Storage Tank Finishes: Storage tanks feature an ultra-smooth, highly polished internal finish (**Ra < 0.8 microns**) to completely eliminate bacterial anchor zones.",
-                "Thermal Extraction Circuit: Built with an isolated closed-loop heat recovery pipeline, keeping incoming solar loop fluids separated from milk cooling operations."
-            ],
-            "Automation & Safety Controls": [
-                "Control System Hardware: **Programmable Logic Controller (PLC)** equipped with automated process profiles for cleaning, production, and standby modes.",
-                "Precision Instrumentation: Dual industrial **RTD (Pt100) temperature sensors** tracking fluid behavior down to a sharp ±0.5°C tolerance.",
-                "Automated Boiler Overrides: Automated valve networks route fluid to the backup fuel boiler on cloudy days or during high production runs.",
-                "Industrial Safety Interlocks: High-limit shutoff valves instantly isolate the solar field if line pressures spike or fluid temperatures approach boiling."
-            ],
-            "Regulatory Compliance & Verification": [
-                "Quality Benchmark: Every fluid component meets strict **3-A Sanitary Standards** for food-grade processing.",
-                "Quality Certifications: System engineering frameworks are built fully compliant with **HACCP documentation metrics** and **ISO 9001** standards."
-            ]
-        },
-        
-        "Textile": {
-            "Plant Fluid Piping": [
-                f"Recommended Main Line Size: **DN {recommended_dn}** (Sized to handle high-volume batch dumps without causing fluid hammering).",
-                "Material Standard: **Heavy-wall Carbon Steel or Ductile Iron** treated with a 5mm sacrificial corrosion allowance to handle raw water chemistry.",
-                "Thermal Insulation: **75mm robust asbestos-free silicate insulation** wrapped in protective outer canvas jackets to protect fabric processing floors."
-            ],
-            "Thermal Buffer Storage Systems": [
-                "Sizing Benchmark: **Dedicated Thermal Buffer Storage** sized for 20-30% of the entire plant's daily volume requirement to manage sudden demand spikes.",
-                "Stratification Design: Vertical storage vessels utilize an internal physical column to separate hot water from cold water without mixing.",
-                "Operational Volume Guidance: Provisions a standalone buffer configuration capable of holding large volumes depending on daily batch schedules."
-            ],
-            "Thermal Heat Exchanger System": [
-                "Hardware Type: **Rugged Shell & Tube Heat Exchanger** to easily process heavily treated dye house wastewater lines.",
-                "Wetted Components Material: **Industrial Titanium Tubing** to shield structural elements from corrosive dyes, bleaching agents, and fixing salts.",
-                "Direct Boiler Interface: Outfitted with auxiliary injection ports to smoothly mix direct utility steam into the loop during heavy operational phases."
-            ],
-            "Dye House Process Integration": [
-                "Multi-Circuit Heat Zoning: Distributed piping headers run independent supply lines to provide varying process temperatures across different areas of the facility.",
-                "Dye Vat Coupling: Direct thermal integration into individual dye vats using high-speed regulating control valves.",
-                "Wastewater Energy Capture: Integrated heat exchangers harvest residual energy from hot wastewater dumps to preheat fresh incoming utility water."
-            ],
-            "Automation & Safety Controls": [
-                "Production Scheduler Interface: Control software matches energy delivery to active batch schedules across the plant floors.",
-                "Temperature Ramping Control: Automated control loops provide smooth temperature ramping curves (±2°C precision) for critical fabric dyeing runs.",
-                "Pressure Constraints: Heavy pressure relief infrastructure caps line pressures at 4 to 6 bar."
-            ]
-        },
-        
-        "Pharmaceutical": {
-            "Plant Fluid Piping": [
-                f"Recommended Main Line Size: **DN {recommended_dn}** (Precisely engineered to maintain clean flow and eliminate stagnant fluid zones).",
-                "Material Standard: **Ultra-pure Electropolished Stainless Steel (SS316L)** ensuring clean, non-reactive fluid delivery.",
-                "Regulatory Traceability: Every pipe layout is heat-stamped and certified for full **FDA/GMP material compliance** trails."
-            ],
-            "Thermal Heat Exchanger System": [
-                "Hardware Type: **Double-Tube or Certified Sanitary Plate & Frame Heat Exchanger** to prevent cross-contamination.",
-                "Sealing Gaskets: **Cleanroom-grade non-degrading gaskets** matching pristine water-for-injection (WFI) standards.",
-                "Pressure Bounds: Heavy-duty structural construction rated for high-pressure operations up to **10 bar**."
-            ],
-            "Precision Instrumentation": [
-                "Sensor Benchmarks: Double-calibrated **RTD sensor networks (accurate to ±0.1°C)** deployed at critical regulatory control nodes.",
-                "Data Archival Automation: 24/7 digital data acquisition system logging compliance metrics for batch audit reviews."
-            ],
-            "Plant Integration & Validation": [
-                "Validation Standards: Complete validation documentation pack featuring full **Installation, Operation, and Performance Qualification (IQ/OQ/PQ)** files.",
-                "System Isolation: Built with three-way diversion valves to instantly redirect fluid streams if production temperatures deviate by even 1°C."
-            ],
-            "Automation & Safety Controls": [
-                "Regulatory Software Stack: Advanced PLC controllers built fully compliant with **FDA 21 CFR Part 11 electronic data validation metrics**.",
-                "Audit Tracking Automation: Tamper-proof internal logging loops record every configuration change made across the system."
-            ]
-        },
-        
-        "Chemical": {
-            "Plant Fluid Piping": [
-                f"Recommended Main Line Size: **DN {recommended_dn}** (Sized to balance friction losses against high fluid volumes).",
-                "Material Standard: **Heavy-gauge Carbon Steel or Hastelloy alloys** protected with specialized internal chemical coatings.",
-                "Pressure Rating: Components use high-strength, durable fittings rated for heavy-duty industrial fluid applications."
-            ],
-            "Thermal Heat Exchanger System": [
-                "Hardware Type: **Double-Wall Industrial Heat Exchanger** preventing hazardous fluids from crossing into process loops.",
-                "Wetted Components Material: Custom **Inconel or Titanium alloy tube sets** to handle aggressive process chemistries."
-            ],
-            "Process Integration & Safety Zones": [
-                "Multi-Tiered Thermal Zoning: Independent flow control circuits regulate temperature profiles across sequential reactor stages.",
-                "Explosion-Proof Compliance: All localized wiring, motors, and instrumentation meet strict **ATEX/IECEx explosion-proof specifications**.",
-                "Secondary Safety Containment: Process pipelines run inside protective secondary outer sleeves to manage line leaks or breaks safely."
-            ],
-            "Automation & Safety Controls": [
-                "Advanced Controls Strategy: Process controllers deploy automated heating and cooling curves to manage reaction loops safely.",
-                "Fault Tolerance Interlocks: Automated bypass valves trigger immediately if a pump fails, maintaining safe internal temperature balances."
-            ]
-        },
-        
-        "Food": {
-            "Plant Fluid Piping": [
-                f"Recommended Main Line Size: **DN {recommended_dn}** (Sized to maintain high sanitation velocities across daily operation).",
-                "Material Standard: **Food-Safe Polished Stainless Steel (SS304 or SS316)** ensuring corrosion resistance and clear sanitary lines.",
-                "Quick-Release Fittings: Outfitted with convenient **Tri-Clamp sanitary fittings** for fast disassembly, cleanouts, and internal pipe checks."
-            ],
-            "Thermal Heat Exchanger System": [
-                "Hardware Type: **Sanitary Frame Heat Exchanger** with smooth internal plate finishes to prevent bacterial adherence.",
-                "Sealing Gaskets: **FDA-certified, non-porous food-grade silicone or EPDM gaskets**."
-            ],
-            "Plant Integration & Food Safety": [
-                "Direct Production Splicing: Solar lines connect smoothly to pre-heating stations for jacketted cooking kettles, cleanups, and boiler feed lines.",
-                "Loop Isolation Strategy: Dual-loop barriers prevent solar storage fluids from ever interacting with food product streams.",
-                "HACCP Data Interface: Built-in data loggers continuously record processing line temperatures to fulfill critical food safety audit guidelines."
-            ],
-            "Automation & Safety Controls": [
-                "Daily Sanitization Cycles: Control systems schedule automatic thermal disinfection sequences during down-time hours.",
-                "Boiler Integration Logic: Automatic control systems switch to utility gas boilers when solar storage reserves empty below the target value.",
-                "High-Limit Thermal Trips: Safety systems isolate the solar field if delivery lines exceed the design threshold of **{tout}°C**."
-            ]
-        }
-    }
-    
-    industry_recommendations = recommendations_dict.get(industry, recommendations_dict["Food"])
-    
-    # Process structured output array cleanly for view parsers
-    result = []
-    for section, items in industry_recommendations.items():
-        result.append(f"\\n### {section}")
-        for item in items:
-            result.append(f"• {item}")
-            
-    return result
-
-
 def calculate_pipe_diameter(total_flow):
     """
     Calculates recommended nominal pipe diameter (DN in mm) 
@@ -170,3 +20,234 @@ def calculate_pipe_diameter(total_flow):
         return "80"   # DN80 (3")
     else:
         return "100"  # DN100 (4")
+
+
+def recommendations(industry="Dairy", tout=80, daily_water=5000, total_flow=250):
+    """
+    Generates high-end, visually striking HTML component spec blocks 
+    tailored specifically for deployment within a web dashboard interface.
+    
+    Replaces raw bullet lists with beautifully formatted, responsive enterprise cards.
+    """
+    recommended_dn = calculate_pipe_diameter(total_flow)
+    
+    # 1. VISUAL DESIGN TOKENS & CONTENT DICTIONARY
+    specs = {
+        "Dairy": {
+            "theme_color": "#2E7D32",   # Deep Sanitary Green
+            "bg_light": "#E8F5E9",
+            "icon": "🥛",
+            "cards": [
+                {
+                    "title": "Plant Fluid Piping",
+                    "badge": f"DN {recommended_dn} Standard",
+                    "details": [
+                        f"Recommended Main Line Size: <b>DN {recommended_dn}</b> optimized to achieve a high-efficiency fluid scouring velocity of 1.0–1.5 m/s to completely eliminate organic sediment settling.",
+                        "Material Standard: <b>Food-Grade Stainless Steel (SS316)</b> ensuring zero risk of bacterial contamination or pitting across active pasteurization runs.",
+                        "Piping Slope Strategy: Pre-install with a downward drainage pitch of at least <b>1:40</b> directly targeting process collection basins for effortless cleaning cycles.",
+                        "Thermal Insulation: <b>50mm high-density mineral wool clad in a rugged aluminum protective shell</b> to eliminate heat radiation across plant floors."
+                    ]
+                },
+                {
+                    "title": "Thermal Heat Exchanger System",
+                    "badge": "Sanitary PHE",
+                    "details": [
+                        "Hardware Configuration: High-efficiency <b>Sanitary Plate Heat Exchanger (PHE)</b> utilizing a flexible 50-to-100 plate stack layout.",
+                        "Wetted Metal Plates: Precision stamped <b>AISI 304 Stainless Steel plates</b> polished to match product purity protocols.",
+                        "Sealing Gaskets: <b>Sanitary-grade EPDM rubber seals</b> engineered to maintain seal compression across thousands of rapid thermal cycles.",
+                        "Hygienic Profile: Built with a specialized smooth geometry maintaining a <b>crevice depth under 100 microns</b> to eliminate fat buildup zones."
+                    ]
+                },
+                {
+                    "title": "Plant Integration & Thermal Re-use",
+                    "badge": f"Target: {tout}°C Max",
+                    "details": [
+                        "Clean-In-Place (CIP) Interface: Connects directly to main plant wash loops, turning captured solar heat into instant energy for high-temperature sanitary flushes.",
+                        "Storage Tank Interior: Insulated containment units specify an ultra-smooth internal finish of <b>Ra &lt; 0.8 microns</b> to prevent bacterial anchoring.",
+                        "Thermal Extraction Circuit: Closed-loop design entirely isolates secondary solar heat transfers from raw, unpasteurized product streams."
+                    ]
+                },
+                {
+                    "title": "Automation & Safety Controls",
+                    "badge": "PLC Integrated",
+                    "details": [
+                        "Control System Hardware: <b>Programmable Logic Controller (PLC)</b> loaded with preset recipe profiles for automated heating, cleaning, and standby modes.",
+                        "Precision Sensors: High-accuracy dual <b>RTD (Pt100) sensors</b> monitoring cross-loop temperature profiles to within ±0.5°C.",
+                        "Automated Boiler Overrides: Motorized 3-way modulating valves auto-route delivery pipelines to the backup steam boiler on low-radiation or high-demand cycles.",
+                        "Hardware Safety Interlocks: High-limit fast-acting relief systems instantly bypass and isolate solar field loops if internal line pressures surge."
+                    ]
+                },
+                {
+                    "title": "Regulatory Compliance & Verification",
+                    "badge": "Auditable Standards",
+                    "details": [
+                        "Sanitation Benchmark: Deploys 100% certified <b>3-A Sanitary Standards</b> components for all fluid contact faces.",
+                        "Quality Verification: Manufacturing documentation patterns map fully to active <b>HACCP guidelines</b> and <b>ISO 9001</b> factory frameworks."
+                    ]
+                }
+            ]
+        },
+        
+        "Textile": {
+            "theme_color": "#1565C0",   # Indigo Blue
+            "bg_light": "#E3F2FD",
+            "icon": "🧵",
+            "cards": [
+                {
+                    "title": "Plant Fluid Piping",
+                    "badge": f"DN {recommended_dn} Heavy Wall",
+                    "details": [
+                        f"Recommended Main Line Size: <b>DN {recommended_dn}</b> optimized to handle high-velocity batch discharge dumps without encountering pipeline water-hammer.",
+                        "Material Standard: Heavy-duty <b>Carbon Steel or Ductile Iron</b> featuring a thick 5mm sacrificial corrosion margin to withstand abrasive raw water treatment values.",
+                        "Thermal Insulation: <b>75mm asbestos-free silicate insulation</b> enclosed in dense protective canvas wrapping tailored for aggressive dye house room floors."
+                    ]
+                },
+                {
+                    "title": "Thermal Buffer Storage Systems",
+                    "badge": f"{daily_water} LPD Buffer Tank",
+                    "details": [
+                        "Storage Strategy: Dedicated <b>Thermal Buffer Storage Tanks</b> built out to handle 20-30% of total plant daily load metrics to smooth out sudden batch demand curves.",
+                        "Stratification Design: High-aspect vertical storage vessels incorporate internal structural diffusion chimneys to isolate hot water from return lines.",
+                        "Capacity Target: Scaled with active buffer configurations allowing massive operational reserves to accommodate changing textile processing shifts."
+                    ]
+                },
+                {
+                    "title": "Thermal Heat Exchanger System",
+                    "badge": "Shell & Tube",
+                    "details": [
+                        "Hardware Configuration: Heavy-duty <b>Shell & Tube Heat Exchanger</b> purpose-built to process high-fouling, raw fabric wastewater discharge streams.",
+                        "Wetted Tubes Material: Deploys <b>Solid Titanium Tube Elements</b> providing defense against harsh dyes, caustic bleaching solutions, and fixing salts.",
+                        "Direct Boiler Interface: Outfitted with built-in utility steam connection ports to quickly balance loop temperatures during extreme operational phases."
+                    ]
+                }
+            ]
+        },
+        
+        "Pharmaceutical": {
+            "theme_color": "#6A1B9A",   # Pure Purple
+            "bg_light": "#F3E5F5",
+            "icon": "🧪",
+            "cards": [
+                {
+                    "title": "Plant Fluid Piping",
+                    "badge": f"DN {recommended_dn} Electropolished",
+                    "details": [
+                        f"Recommended Main Line Size: <b>DN {recommended_dn}</b> engineered with extreme precision to secure seamless loop flow and remove fluid stagnation pockets.",
+                        "Material Standard: <b>Ultra-pure Electropolished Stainless Steel (SS316L)</b> providing non-reactive, clean fluid delivery.",
+                        "Traceability Logs: Every pipeline assembly is heat-stamped and mapped for strict <b>FDA/GMP material qualification audits</b>."
+                    ]
+                },
+                {
+                    "title": "Thermal Heat Exchanger System",
+                    "badge": "Double-Wall Frame",
+                    "details": [
+                        "Hardware Design: <b>Double-Tube or Certified Pharmaceutical Grade Plate Exchanger</b> delivering zero-leak separation protocols.",
+                        "Sealing Elements: <b>Cleanroom-certified, non-degrading fluoropolymer gaskets</b> compliant with high-purity Water-For-Injection (WFI) streams.",
+                        "Structural Integrity: High-strength configuration tested and rated for heavy-duty industrial processing limits up to <b>10 bar</b>."
+                    ]
+                }
+            ]
+        },
+
+        "Chemical": {
+            "theme_color": "#E65100",   # Warning Orange / Amber
+            "bg_light": "#FFF3E0",
+            "icon": "⚗️",
+            "cards": [
+                {
+                    "title": "Plant Fluid Piping",
+                    "badge": f"DN {recommended_dn} Heavy Wall",
+                    "details": [
+                        f"Recommended Main Line Size: <b>DN {recommended_dn}</b> precisely calculated to optimize flow velocity, balancing friction loss against required volume delivery.",
+                        "Material Standard: <b>Heavy-gauge Carbon Steel or Hastelloy Alloys</b> protected with specialized internal anti-corrosion chemical linings.",
+                        "Pressure Bounds: All piping runs and connection couplings utilize industrial high-strength flanges rated for severe process pressures."
+                    ]
+                },
+                {
+                    "title": "Thermal Heat Exchanger System",
+                    "badge": "Double-Wall Isolation",
+                    "details": [
+                        "Hardware Configuration: Fully isolated <b>Double-Wall Shell or Plate Exchanger</b> ensuring hazardous process media can never mix into storage lines.",
+                        "Wetted Tubes Material: Specialized <b>Inconel or Solid Titanium alloy sets</b> to withstand reactive, aggressive process chemistries."
+                    ]
+                }
+            ]
+        },
+
+        "Food": {
+            "theme_color": "#D32F2F",   # Production Red
+            "bg_light": "#FFEBEE",
+            "icon": "🍲",
+            "cards": [
+                {
+                    "title": "Plant Fluid Piping",
+                    "badge": f"DN {recommended_dn} Food-Safe",
+                    "details": [
+                        f"Recommended Main Line Size: <b>DN {recommended_dn}</b> calibrated to maintain clean, high-velocity sweeps throughout daily system operations.",
+                        "Material Standard: <b>Polished Stainless Steel (SS304 or SS316)</b> offering high oxidation resistance and perfectly clean sanitary fluid lines.",
+                        "Quick-Release Assembly: Outfitted with standardized industrial <b>Tri-Clamp sanitary fittings</b> for easy, tool-free line checks and internal component sweeps."
+                    ]
+                },
+                {
+                    "title": "Thermal Heat Exchanger System",
+                    "badge": "FDA-Approved Plate",
+                    "details": [
+                        "Hardware Geometry: <b>Sanitary Frame Heat Exchanger</b> with an ultra-smooth plate face profile to eliminate bacterial anchoring vectors.",
+                        "Sealing Elements: <b>FDA-certified, non-porous food-grade silicone or EPDM gaskets</b> designed for continuous clean operation."
+                    ]
+                }
+            ]
+        }
+    }
+
+    # Fallback to Food if the selected industry isn't explicitly defined
+    selected_data = specs.get(industry, specs["Food"])
+    theme = selected_data["theme_color"]
+    bg_card = selected_data["bg_light"]
+    icon = selected_data["icon"]
+
+    # 2. RENDER SUMMARY METRIC HEADER BANNER
+    html_output = f"""
+    <div style='font-family: Arial, sans-serif; margin-bottom: 25px;'>
+        <div style='display: flex; align-items: center; background-color: {theme}; color: white; padding: 15px; border-radius: 8px 8px 0 0; margin-bottom: 0;'>
+            <span style='font-size: 24px; margin-right: 12px;'>{icon}</span>
+            <h2 style='margin: 0; font-size: 18px; font-weight: bold; letter-spacing: 0.5px;'>{industry.upper()} INTEGRATION SPECIFICATION OVERVIEW</h2>
+        </div>
+        <table style='width: 100%; border-collapse: collapse; background-color: #FAFAFA; border: 1px solid #CFD8DC; border-top: none; font-size: 13px;'>
+            <tr style='background-color: #ECEFF1;'>
+                <td style='padding: 10px; font-weight: bold; color: #37474F; border-right: 1px solid #CFD8DC;'>Target Temperature</td>
+                <td style='padding: 10px; font-weight: bold; color: #37474F; border-right: 1px solid #CFD8DC;'>Daily Volume Capacity</td>
+                <td style='padding: 10px; font-weight: bold; color: #37474F;'>Calculated Pipe Line Size</td>
+            </tr>
+            <tr>
+                <td style='padding: 12px; color: #455A64; border-right: 1px solid #CFD8DC; font-size: 15px; font-weight: bold;'>{tout}°C</td>
+                <td style='padding: 12px; color: #455A64; border-right: 1px solid #CFD8DC; font-size: 15px; font-weight: bold;'>{daily_water:,} LPD</td>
+                <td style='padding: 12px; color: #D32F2F; font-size: 15px; font-weight: bold;'>DN {recommended_dn}</td>
+            </tr>
+        </table>
+    </div>
+    """
+
+    # 3. GENERATE THE COMPONENT VISUAL CARDS
+    for card in selected_data["cards"]:
+        detail_items_html = ""
+        for detail in card["details"]:
+            detail_items_html += f"""
+            <li style='margin-bottom: 8px; color: #37474F; line-height: 1.5;'>
+                {detail}
+            </li>
+            """
+            
+        html_output += f"""
+        <div style='font-family: Arial, sans-serif; background-color: #FFFFFF; border-left: 5px solid {theme}; border-top: 1px solid #E0E0E0; border-right: 1px solid #E0E0E0; border-bottom: 1px solid #E0E0E0; border-radius: 4px; padding: 18px; margin-bottom: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.04);'>
+            <div style='display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ECEFF1; padding-bottom: 8px; margin-bottom: 12px;'>
+                <h3 style='margin: 0; color: {theme}; font-size: 15px; font-weight: bold;'>{card["title"]}</h3>
+                <span style='background-color: {bg_card}; color: {theme}; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; text-transform: uppercase;'>{card["badge"]}</span>
+            </div>
+            <ul style='margin: 0; padding-left: 20px;'>
+                {detail_items_html}
+            </ul>
+        </div>
+        """
+        
+    return html_output
