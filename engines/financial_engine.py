@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 def calculate_market_project_cost(total_area, collector_type="Flat Plate Collector"):
     """
@@ -78,7 +79,9 @@ def calculate_comprehensive_npv(initial_investment, year_one_savings, lifecycle_
         # Discount future cash values back to present terms
         present_value_factor = (1.0 + discount_rate) ** year
         discounted_cash_flow = net_cash_flow / present_value_factor
-        discounted_cash_flows.append(discounted_flow)
+        
+        # FIXED: Variable name typo corrected here to match properly
+        discounted_cash_flows.append(discounted_cash_flow)
         
         # Advance economic parameters for the following year
         current_year_savings *= (1.0 + fuel_escalation)
