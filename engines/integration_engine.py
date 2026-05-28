@@ -1,5 +1,5 @@
 def calculate_pipe_diameter(total_flow):
-    """Calculates engineering nominal pipe size (DN) based on LPH flow rate."""
+    """Calculates standard industrial pipe size (DN) based on flow."""
     if total_flow <= 150: return "20"
     elif total_flow <= 400: return "25"
     elif total_flow <= 900: return "32"
@@ -11,50 +11,48 @@ def calculate_pipe_diameter(total_flow):
 
 def recommendations(industry="Dairy", tout=80, tinlet=25, tambient=30, daily_water=5000, total_flow=250):
     """
-    Deep Industrial Product Design Engine.
-    Evaluates hydraulic mass, thermal lift, and site climate parameters to dynamically
-    generate optimized fluid regimes and hardware specs for a technical proposal.
+    Simplified Industrial Proposal Engine.
+    Uses pictorial bars and simple English to explain technical design.
     """
     recommended_dn = calculate_pipe_diameter(total_flow)
     
-    # --- DYNAMIC SYSTEM DESIGN CALCULATIONS ---
+    # Logic for Heat Lift Visual
     approach_delta = tout - tinlet
-    total_mass_kg = daily_water
+    heat_lift_pct = min(100, int((approach_delta / 100) * 100))
     
-    # 1. DYNAMIC REGIME SPECIFICATION (RESEARCH-DRIVEN PRODUCT DESIGN)
-    # Target a high Reynolds number approximation for optimal heat exchanger sizing
+    # 1. FLOW STYLE (Pictorial Indicator)
     if total_flow >= 500:
-        flow_regime = "High-Turbulence Flow (Re &gt; 4,000)"
-        flow_desc = f"At {total_flow} LPH, the loop induces high fluid velocity, disrupting boundary layers. This maximizes the convective heat transfer coefficient inside the heat exchanger, keeping surface fouling low."
+        flow_style = "High-Efficiency Fast Flow"
+        flow_color = "#2E7D32"
+        flow_desc = "Water moves fast to <b>soak up maximum heat</b> from the panels. Keeps the system clean and prevents scale buildup."
+        flow_bar = "75%"
     else:
-        flow_regime = "Transitional/Laminar Flow (Re &le; 4,000)"
-        flow_desc = f"A conservative process flow of {total_flow} LPH prioritizes minimal pump parasitic power draw. System relies on specialized micro-channel plate patterns to artificially induce mixing at low velocities."
+        flow_style = "Steady Consistent Flow"
+        flow_color = "#1565C0"
+        flow_desc = "Water moves slowly to <b>save on electricity</b>. Best for smaller daily needs without wasting pump power."
+        flow_bar = "30%"
 
-    # 2. LOOP RECIRCULATION STRATEGY
-    if approach_delta > 50:
-        recirc_strategy = "Multi-Stage Recirculation Loop"
-        recirc_desc = f"A substantial thermal lift requirement ({approach_delta}°C Delta) demands an automated variable-speed recirculation layout to avoid thermal shocking across the exchanger matrix."
+    # 2. WEATHER PROTECTION
+    if tambient < 15:
+        weather_style = "Winter & Cold Protection"
+        weather_icon = "❄️"
+        weather_desc = "The system will automatically <b>protect itself from freezing</b>. No risk of pipe bursts during cold nights."
     else:
-        recirc_strategy = "Single-Pass Crossflow"
-        recirc_desc = f"A compact approach profile ({approach_delta}°C Delta) allows energy-efficient single-pass target heating, streamlining footprint and valve layouts."
+        weather_style = "Summer & Heat Optimization"
+        weather_icon = "☀️"
+        weather_desc = "Designed to <b>shed extra heat</b> safely when the sun is too strong. Keeps the system running cool and safe."
 
-    # 3. CLIMATIC SHIELDING STRATEGY
-    if tambient < 10:
-        freeze_strategy = "Active Glycol / Auto-Drain Down"
-        freeze_desc = f"Low ambient risk profile ({tambient}°C) triggers active drain-down sequencing or an isolated food-safe monopropylene glycol circuit to prevent piping rupture."
+    # 3. INSTALLATION SPACE
+    if daily_water >= 6000:
+        load_style = "Industrial Ground/Roof Mount"
+        load_desc = "The system is heavy (6+ Tons). We will use <b>reinforced steel frames</b> to keep the panels steady in high winds."
+        load_bar = "90%"
     else:
-        freeze_strategy = "Standard Night-Sky Venting"
-        freeze_desc = f"Stable climate profile ({tambient}°C ambient) eliminates freeze risk. System prioritizes continuous night-sky heat radiation purge loops to maintain safety bounds."
+        load_style = "Compact Platform Mount"
+        load_desc = "A lightweight setup that fits easily on <b>existing roof spaces</b> or maintenance racks with no extra construction."
+        load_bar = "45%"
 
-    # 4. STRUCTURAL ARRAY MOUNTING FOOTPRINT
-    if total_mass_kg >= 6000:
-        structural_load = "Heavy Structural Array Concrete Pad"
-        structural_desc = f"High structural loading ({total_mass_kg:,} kg hydraulic operating weight) dictates reinforced dual-girder placement and vibration-isolated foundation pads."
-    else:
-        structural_load = "Standard Elevated Platform Mount"
-        structural_desc = f"Moderate hydraulic structural footprint ({total_mass_kg:,} kg weight) fits standard elevated plant mezzanine space configurations."
-
-    # --- BRANDED INDUSTRY THEME MATRIX ---
+    # Branded Themes
     profiles = {
         "Dairy": {"color": "#1e4620", "accent": "#2E7D32", "bg": "#f4f9f4", "icon": "🥛"},
         "Textile": {"color": "#0d3c61", "accent": "#1565C0", "bg": "#f0f5fa", "icon": "🧵"},
@@ -63,105 +61,83 @@ def recommendations(industry="Dairy", tout=80, tinlet=25, tambient=30, daily_wat
         "Food": {"color": "#D32F2F", "accent": "#D32F2F", "bg": "#FFEBEE", "icon": "🍲"}
     }
     p = profiles.get(industry, profiles["Food"])
-    
-    # Core hardware specifications mapped to targeted industrial sectors
-    industry_specs = {
-        "Dairy": [
-            {"label": "Fluid Piping Infrastructure", "val": f"DN {recommended_dn} SS316 Food-Grade", "desc": "Sized perfectly to maintain fluid velocities within a 1.0–1.5 m/s sanitation window to eliminate residue settling. Sloped at 1:40 for self-draining CIP compliance."},
-            {"label": "Heat Exchanger Core", "val": "Sanitary Plate (PHE)", "desc": "AISI 304 electro-polished plate layout with food-grade sanitary EPDM seals. Internal crevice depth is restricted below 100 microns to stop fat accumulation."}
-        ],
-        "Textile": [
-            {"label": "Fluid Piping Infrastructure", "val": f"DN {recommended_dn} Heavy-Wall Steel", "desc": "Engineered to withstand abrupt pressure wave anomalies from sudden batch dump sequencing. Incorporates a 5mm carbon structural corrosion wall allowance."},
-            {"label": "Heat Exchanger Core", "val": "Titanium Shell & Tube", "desc": "Solid titanium internal element bundle designed to completely resist degradation from chemical aggressive dye compounds, mordants, and harsh fixing salts."}
-        ],
-        "Pharmaceutical": [
-            {"label": "Fluid Piping Infrastructure", "val": f"DN {recommended_dn} Electropolished SS316L", "desc": "Ultra-pure internal surface treatments completely eliminating static micro-pockets. Heat-stamped serial lines feed directly into automated cleanroom tracking loops."},
-            {"label": "Heat Exchanger Core", "val": "Double-Wall Isolation Frame", "desc": "Dual physical partition plates guarantee absolute isolation, rendering cross-contamination impossible between process utility heating water and unadulterated pure WFI lines."}
-        ],
-        "Chemical": [
-            {"label": "Fluid Piping Infrastructure", "val": f"DN {recommended_dn} Hastelloy Alloy", "desc": "High-nickel alloy piping configured to survive severe acidic exposures, heavy thermal cycling stress, and fluctuating high operating pressures safely."},
-            {"label": "Heat Exchanger Core", "val": "Dual-Tube Safety Shell", "desc": "Double isolated tube sheets designed to reliably capture and separate hazardous process media away from primary factory water utility systems."}
-        ],
-        "Food": [
-            {"label": "Fluid Piping Infrastructure", "val": f"DN {recommended_dn} Polished SS304", "desc": "Assembled entirely using standard industrial heavy-duty Tri-Clamp modular components for rapid breakdown maintenance, sterilization sweeps, and line re-routing."},
-            {"label": "Heat Exchanger Core", "val": "FDA-Approved Plate Stack", "desc": "Clean-profile mirror-polished sheets held inside an open-frame compression layout using certified non-porous food-grade silicone seals for simplified cleaning."}
-        ]
-    }
 
-    active_specs = industry_specs.get(industry, industry_specs["Food"])
-
-    # Combine localized hardware configurations with calculated fluid design profiles
-    all_specs = active_specs + [
-        {"label": "Optimal Fluid Dynamics", "val": flow_regime, "desc": flow_desc},
-        {"label": "Thermal Loop Control", "val": recirc_strategy, "desc": recirc_desc},
-        {"label": "Climatic Shielding Strategy", "val": freeze_strategy, "desc": freeze_desc},
-        {"label": "Structural Support Footprint", "val": structural_load, "desc": structural_desc}
-    ]
-
-    # Render HTML Executive Layout Presentation Matrix
+    # START HTML
     html = f"""
-    <div style="font-family: 'Segoe UI', Roboto, sans-serif; background-color: #ffffff; padding: 5px; border-radius: 12px;">
+    <div style="font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #fff; padding: 10px; border-radius: 15px; border: 1px solid #eee;">
         
-        <div style="background: linear-gradient(135deg, {p['color']}, {p['accent']}); color: white; padding: 24px; border-radius: 10px; margin-bottom: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <span style="font-size: 32px; background: rgba(255,255,255,0.2); padding: 8px 14px; border-radius: 50%;">{p['icon']}</span>
-                    <div>
-                        <h2 style="margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.5px;">ENGINEERING PROPOSAL SPECIFICATION</h2>
-                        <p style="margin: 3px 0 0 0; opacity: 0.85; font-size: 13px;">Custom Solar Thermal Integration Architecture for the {industry} Industry</p>
-                    </div>
+        <div style="background: linear-gradient(135deg, {p['color']}, {p['accent']}); color: white; padding: 30px; border-radius: 12px; margin-bottom: 25px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1 style="margin: 0; font-size: 26px;">{industry} Solar Proposal</h1>
+                    <p style="margin: 5px 0 0 0; opacity: 0.9;">System Sizing for {daily_water:,} Liters per day</p>
                 </div>
-                <div style="background: rgba(255,255,255,0.15); padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.25);">
-                    Proposal Reference: {industry[:3].upper()}-ISO-{tout}
-                </div>
+                <div style="font-size: 40px;">{p['icon']}</div>
             </div>
             
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-top: 20px; background: rgba(0,0,0,0.15); padding: 15px; border-radius: 8px;">
-                <div style="border-right: 1px solid rgba(255,255,255,0.2); padding-right: 10px;">
-                    <div style="font-size: 10px; text-transform: uppercase; opacity: 0.8; font-weight: 600;">Process Lift Delta</div>
-                    <div style="font-size: 20px; font-weight: 700; margin-top: 2px;">+{approach_delta}°C</div>
-                </div>
-                <div style="border-right: 1px solid rgba(255,255,255,0.2); padding-right: 10px;">
-                    <div style="font-size: 10px; text-transform: uppercase; opacity: 0.8; font-weight: 600;">Daily Volumetric Design</div>
-                    <div style="font-size: 20px; font-weight: 700; margin-top: 2px;">{daily_water:,} <span style="font-size:12px; font-weight:400;">LPD</span></div>
-                </div>
-                <div style="border-right: 1px solid rgba(255,255,255,0.2); padding-right: 10px;">
-                    <div style="font-size: 10px; text-transform: uppercase; opacity: 0.8; font-weight: 600;">Site Ambient Baseline</div>
-                    <div style="font-size: 20px; font-weight: 700; margin-top: 2px;">{tambient}°C</div>
-                </div>
-                <div>
-                    <div style="font-size: 10px; text-transform: uppercase; opacity: 0.8; font-weight: 600;">Calculated Pipeline Main</div>
-                    <div style="font-size: 20px; font-weight: 700; margin-top: 2px; color: #fffb00;">DN {recommended_dn}</div>
-                </div>
-            </div>
-        </div>
-
-        <h4 style="color: #37474F; font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 0 0 15px 0; letter-spacing: 0.5px;">Custom Integration Feature Layout</h4>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 10px;">
-    """
-    
-    # Populate the dynamic proposal cards inside the presentation layout grid
-    for s in all_specs:
-        html += f"""
-            <div style="background-color: {p['bg']}; border: 1px solid rgba(0,0,0,0.06); border-top: 4px solid {p['accent']}; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: space-between;">
-                <div>
-                    <div style="font-size: 10px; text-transform: uppercase; color: #666; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px;">PRODUCT MODULE</div>
-                    <h3 style="margin: 0 0 10px 0; font-size: 15px; font-weight: 700; color: {p['color']};">{s['label']}</h3>
-                    <div style="font-size: 13px; font-weight: 700; color: #222; background: #ffffff; padding: 8px 12px; border-radius: 6px; border-left: 3px solid {p['accent']}; margin-bottom: 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);">
-                        {s['val']}
+            <div style="display: flex; gap: 20px; margin-top: 25px; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; text-align: center;">
+                <div style="flex: 1;">
+                    <div style="font-size: 11px; opacity: 0.8; text-transform: uppercase;">Heat Gain Goal</div>
+                    <div style="font-size: 18px; font-weight: bold;">+{approach_delta}°C</div>
+                    <div style="background: #fff; height: 6px; border-radius: 3px; margin-top: 5px; overflow: hidden;">
+                        <div style="background: #ffeb3b; width: {heat_lift_pct}%; height: 100%;"></div>
                     </div>
-                    <p style="margin: 0; font-size: 12px; color: #44546a; line-height: 1.6; text-align: justify;">
-                        {s['desc']}
-                    </p>
+                </div>
+                <div style="flex: 1; border-left: 1px solid rgba(255,255,255,0.2);">
+                    <div style="font-size: 11px; opacity: 0.8; text-transform: uppercase;">Pipe Thickness</div>
+                    <div style="font-size: 18px; font-weight: bold;">DN {recommended_dn}</div>
+                    <p style="font-size: 10px; margin: 0;">Standard Size</p>
+                </div>
+                <div style="flex: 1; border-left: 1px solid rgba(255,255,255,0.2);">
+                    <div style="font-size: 11px; opacity: 0.8; text-transform: uppercase;">Climate Health</div>
+                    <div style="font-size: 18px; font-weight: bold;">{tambient}°C</div>
+                    <p style="font-size: 10px; margin: 0;">Good for Solar</p>
                 </div>
             </div>
-        """
-        
-    html += """
         </div>
-        <div style="text-align: right; font-size: 11px; color: #999; margin-top: 15px; font-style: italic; padding-right: 5px;">
-            * Technical engineering recommendation models adapt continuously based on customized input parameters.
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            
+            <div style="background: {p['bg']}; padding: 20px; border-radius: 10px; border: 1px solid #e0e0e0;">
+                <h3 style="margin: 0 0 10px 0; color: {p['color']}; font-size: 18px;">🛠️ Pipe & Infrastructure</h3>
+                <div style="background: #fff; padding: 10px; border-radius: 5px; margin-bottom: 10px; font-weight: bold; border-left: 4px solid {p['accent']};">
+                    Material: Food-Grade Stainless Steel
+                </div>
+                <p style="font-size: 13px; color: #555;">High-quality pipes that won't rust and keep your water 100% clean for {industry} use.</p>
+            </div>
+
+            <div style="background: {p['bg']}; padding: 20px; border-radius: 10px; border: 1px solid #e0e0e0;">
+                <h3 style="margin: 0 0 10px 0; color: {p['color']}; font-size: 18px;">💧 Water Flow Style</h3>
+                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px;">
+                    <span>Slow</span><span style="color: {flow_color}; font-weight: bold;">{flow_style}</span><span>Fast</span>
+                </div>
+                <div style="background: #ddd; height: 12px; border-radius: 6px; margin-bottom: 15px;">
+                    <div style="background: {flow_color}; width: {flow_bar}; height: 100%; border-radius: 6px;"></div>
+                </div>
+                <p style="font-size: 13px; color: #555;">{flow_desc}</p>
+            </div>
+
+            <div style="background: {p['bg']}; padding: 20px; border-radius: 10px; border: 1px solid #e0e0e0;">
+                <h3 style="margin: 0 0 10px 0; color: {p['color']}; font-size: 18px;">{weather_icon} Weather Ready</h3>
+                <div style="background: #fff; padding: 10px; border-radius: 5px; margin-bottom: 10px; font-weight: bold; border-left: 4px solid #f44336;">
+                    Strategy: {weather_style}
+                </div>
+                <p style="font-size: 13px; color: #555;">{weather_desc}</p>
+            </div>
+
+            <div style="background: {p['bg']}; padding: 20px; border-radius: 10px; border: 1px solid #e0e0e0;">
+                <h3 style="margin: 0 0 10px 0; color: {p['color']}; font-size: 18px;">🏗️ Installation Type</h3>
+                <div style="font-size: 12px; margin-bottom: 5px;"><b>Support Level:</b> {load_style}</div>
+                <div style="background: #ddd; height: 12px; border-radius: 6px; margin-bottom: 15px;">
+                    <div style="background: #333; width: {load_bar}; height: 100%; border-radius: 6px;"></div>
+                </div>
+                <p style="font-size: 13px; color: #555;">{load_desc}</p>
+            </div>
+
+        </div>
+
+        <div style="margin-top: 25px; padding: 15px; background: #fffde7; border-left: 5px solid #fbc02d; font-size: 12px;">
+            <b>Note for Customer:</b> This setup replaces expensive electricity or diesel with free sun energy. It is designed to work for 15-20 years with low maintenance.
         </div>
     </div>
     """
