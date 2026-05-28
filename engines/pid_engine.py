@@ -1,8 +1,8 @@
 def generate_pid(industry="Dairy", collectors=5, tout=80, daily_water=5000, total_flow=250):
     """
-    Generate a high-visibility, standard-compliant P&ID diagram.
-    Fixed layout balance issues: minimizes instrument nodes, balances aspect ratios, 
-    and keeps the operational diagram large, centered, and crystal clear.
+    Generates a perfectly balanced, wide-format P&ID diagram.
+    Replaces the bulky sidebar legend cluster with a compact horizontal HTML footer.
+    This forces the main engineering system components to scale up massively across the screen.
     """
     
     # Process Logic Flags
@@ -17,134 +17,139 @@ def generate_pid(industry="Dairy", collectors=5, tout=80, daily_water=5000, tota
     pid = f"""
     digraph IndustrialSolarPID {{
         rankdir=LR;
-        splines=ortho;  # Straight, clean perpendicular pipes instead of messy curves
-        nodesep=0.6;
-        ranksep=0.8;
+        splines=ortho;       # Straight, professional perpendicular pipe lines
+        nodesep=0.5;         # Vertical space between paths
+        ranksep=0.7;         # Horizontal space between equipment
         bgcolor=white;
-        concentrate=true;
-        
-        # Global Design Tokens
-        node [fontname="Arial Bold", fontsize=10, shape=box, style="filled,rounded", fillcolor="#FFFFFF", color="#37474F", penwidth=1.5];
-        edge [fontname="Arial", fontsize=9, labelfontcolor="#263238", penwidth=2];
+        pad="0.5,0.5";
         
         # =====================================================
-        # CORE EQUIPMENT (PROPORTIONAL SIZING)
+        # DESIGN TOKENS (Strictly Controlled Dimensions)
         # =====================================================
-        SC     [label="SOLAR FIELD\\n({collectors} Collectors)", shape=box, style=filled, fillcolor="#FFFDE7", width=1.8, height=1.0];
-        PUMP   [label="PRIMARY\\nPUMP", shape=circle, fixedsize=true, width=0.8, height=0.8, fillcolor="#ECEFF1"];
-        HX     [label="PLATE HX\\n(Solar-to-Storage)", shape=box, style=filled, fillcolor="#E3F2FD", width=1.6, height=1.0];
-        {tank_id}   [label="{tank_label}\\n({daily_water} LPD)", shape=cylinder, fixedsize=true, width=1.6, height=1.8, fillcolor="#E0F7FA"];
+        # Standard equipment style
+        node [fontname="Arial Bold", fontsize=10, shape=box, style="filled,rounded", fillcolor="#FFFFFF", color="#263238", penwidth=1.5];
+        edge [fontname="Arial", fontsize=9, labelfontcolor="#263238", penwidth=1.75];
         
-        # =====================================================
-        # SLEEK INSTRUMENTATION BUBBLES (EXACT SIZE CONTROL)
-        # =====================================================
-        node [shape=circle, fixedsize=true, width=0.45, height=0.45, fillcolor="#FFFFFF", style=filled, fontsize=8, color="#455A64"];
+        # Core Process Assets
+        SC     [label="SOLAR FIELD\\n({collectors} Collectors)", shape=box, style=filled, fillcolor="#FFFDE7", fixedsize=true, width=1.8, height=0.8];
+        PUMP   [label="PRIMARY\\nPUMP", shape=circle, fixedsize=true, width=0.75, height=0.75, fillcolor="#ECEFF1"];
+        HX     [label="PLATE HX\\n(Solar-to-Storage)", shape=box, style=filled, fillcolor="#E3F2FD", fixedsize=true, width=1.6, height=0.8];
+        {tank_id}   [label="{tank_label}\\n({daily_water} LPD)", shape=cylinder, fixedsize=true, width=1.6, height=1.6, fillcolor="#E0F7FA"];
+        
+        # Sleek Instrument Bubbles (Locked small)
+        node [shape=circle, fixedsize=true, width=0.4, height=0.4, fillcolor="#FFFFFF", style=filled, fontsize=8, color="#37474F", penwidth=1.2];
         TT_field [label="TT\\n101"];
         PT_field [label="PT\\n101"];
         TT_hx    [label="TT\\n102"];
         TT_tank  [label="TT\\n103"];
         LT_tank  [label="LT\\n101"];
         
-        # =====================================================
-        # INLINE INVENTORY / VALVES (COMPACT SHAPES)
-        # =====================================================
-        node [shape=box, fixedsize=true, width=0.7, height=0.35, fontsize=8, fillcolor="#FAFAFA", style="filled"];
+        # Inline Fittings & Valves (Locked small)
+        node [shape=box, fixedsize=true, width=0.7, height=0.3, fontsize=8, fillcolor="#FAFAFA", style="filled", color="#455A64"];
         CV_in  [label="Check Vlv"];
         PSV    [label="Safety Vlv"];
         EV     [label="Exp Tank"];
         
         # =====================================================
-        # FLUID PIPING ENGINE (Left to Right High-Speed Paths)
+        # PROCESS FLOW PIPING JUNCTIONS
         # =====================================================
         
-        # Primary Loop Heating Cycle
+        # Primary Loop (Hot Side)
         SC -> PT_field [color="#D32F2F", label=" Hot Fluid "];
         PT_field -> TT_field [color="#D32F2F"];
         TT_field -> HX [color="#D32F2F"];
         
-        # Primary Loop Cold Return Path
-        HX -> PUMP [color="#1976D2", label=" Cooled Return "];
+        # Primary Loop (Cold Return)
+        HX -> PUMP [color="#1976D2", label=" Cooled Fluid "];
         PUMP -> CV_in [color="#1976D2"];
         CV_in -> PSV [color="#1976D2"];
         PSV -> SC [color="#1976D2"];
         
-        # Closed-loop Safety Connections
+        # Safety Expansion
         PSV -> EV [style=dashed, color="#78909C", arrowhead=none];
         
-        # Secondary Tank Charging Circuit
-        HX -> TT_hx [color="#E65100", label=" Hot Charging "];
+        # Charging Circuit
+        HX -> TT_hx [color="#E65100", label=" Charging "];
         TT_hx -> {tank_id} [color="#E65100"];
         
-        # Transmitters bound clearly to Storage
-        {tank_id} -> TT_tank [style=dotted, color="#546E7A", arrowhead=none, weight=2];
-        {tank_id} -> LT_tank [style=dotted, color="#546E7A", arrowhead=none, weight=2];
+        # Instrumentation ties to Tank
+        {tank_id} -> TT_tank [style=dotted, color="#78909C", arrowhead=none];
+        {tank_id} -> LT_tank [style=dotted, color="#78909C", arrowhead=none];
         
         # =====================================================
-        # BACKUP SUBSYSTEMS
+        # OPTIONAL BACKUP SUBSYSTEM
         # =====================================================
         """
         
     if has_backup:
         pid += f"""
-        node [shape=box, fontname="Arial Bold", fontsize=10, style=filled, fixedsize=false];
-        BOILER [label="BACKUP BOILER\\n(Spikes to {tout}°C)", fillcolor="#FFEBEE", width=1.5, height=0.8];
-        BV     [label="Control\\nValve", shape=box, fixedsize=true, width=0.6, height=0.35, fontsize=8, fillcolor="#FAFAFA"];
+        node [shape=box, fontname="Arial Bold", fontsize=10, style=filled, fixedsize=true, width=1.5, height=0.7, color="#263238"];
+        BOILER [label="BACKUP BOILER\\n(Spikes to {tout}°C)", fillcolor="#FFEBEE"];
+        BV     [label="Control\\nValve", shape=box, fixedsize=true, width=0.6, height=0.3, fontsize=8, fillcolor="#FAFAFA"];
         
-        {tank_id} -> BOILER [color="#D32F2F", style=dashed, label=" Boost Circuit "];
+        {tank_id} -> BOILER [color="#D32F2F", style=dashed, label=" Temp Drop "];
         BOILER -> BV [color="#D32F2F"];
         BV -> {tank_id} [color="#D32F2F"];
         """
         
     pid += f"""
         # =====================================================
-        # END USER RECIPIENT APPLICATION LOOP
+        # USER DELIVERY APPLICATION LOOP
         # =====================================================
         """
         
     if has_cip:
         pid += f"""
-        node [shape=box, fontname="Arial Bold", fontsize=10, style=filled, fixedsize=false];
-        PROCESS [label="CLEAN-IN-PLACE (CIP) SYSTEM\\n{industry} Process Loop", fillcolor="#E8F5E9", width=2.2, height=0.9];
-        CIPpump [label="CIP\\nPUMP", shape=circle, fixedsize=true, width=0.7, height=0.7, fillcolor="#ECEFF1"];
+        node [shape=box, fontname="Arial Bold", fontsize=10, style=filled, fixedsize=true, width=2.2, height=0.8, color="#263238"];
+        PROCESS [label="CLEAN-IN-PLACE (CIP) SYSTEM\\n{industry} Process Automation", fillcolor="#E8F5E9"];
+        CIPpump [label="CIP\\nPUMP", shape=circle, fixedsize=true, width=0.65, height=0.65, fillcolor="#ECEFF1"];
         
         {tank_id} -> CIPpump [color="#D32F2F", label=" Process Out "];
         CIPpump -> PROCESS [color="#D32F2F"];
         """
     elif has_process_control:
         pid += f"""
-        node [shape=box, fontname="Arial Bold", fontsize=10, style=filled, fixedsize=false];
-        PROCESS [label="PRODUCTION HEAT EXCHANGER\\nPlant Delivery Floor", fillcolor="#E8F5E9", width=2.2, height=0.9];
-        FC      [label="Flow Ctrl", shape=box, fixedsize=true, width=0.6, height=0.35, fontsize=8, fillcolor="#FAFAFA"];
+        node [shape=box, fontname="Arial Bold", fontsize=10, style=filled, fixedsize=true, width=2.2, height=0.8, color="#263238"];
+        PROCESS [label="PRODUCTION HEAT EXCHANGER\\nPlant Delivery Floor", fillcolor="#E8F5E9"];
+        FC      [label="Flow Ctrl", shape=box, fixedsize=true, width=0.6, height=0.3, fontsize=8, fillcolor="#FAFAFA"];
         
         {tank_id} -> FC [color="#D32F2F", label=" Regulated "];
         FC -> PROCESS [color="#D32F2F"];
         """
     else:
         pid += f"""
-        node [shape=box, fontname="Arial Bold", fontsize=10, style=filled, fixedsize=false];
-        PROCESS [label="PLANT UTILITY SUPPLY\\nHot Water Outlets", fillcolor="#E8F5E9", width=2.2, height=0.9];
+        node [shape=box, fontname="Arial Bold", fontsize=10, style=filled, fixedsize=true, width=2.2, height=0.8, color="#263238"];
+        PROCESS [label="PLANT UTILITY SUPPLY\\nHot Water Outlets", fillcolor="#E8F5E9"];
         
-        {tank_id} -> PROCESS [color="#D32F2F", label=" General Demands "];
+        {tank_id} -> PROCESS [color="#D32F2F", label=" General Load "];
         """
         
     pid += f"""
         # =====================================================
-        # COMPACT ROW-SINK LEGEND (Prevents Graph Stretching)
+        # COMPACT HORIZONTAL LEGEND BLOCK (FORCES FULL-WIDTH RESIZE)
         # =====================================================
-        subgraph cluster_legend {{
-            label="DIAGRAM UTILITY KEY / LEGEND";
-            fontname="Arial Bold";
-            fontsize=11;
-            color="#90A4AE";
-            style=dashed;
-            rank=sink; # Pushes the legend strictly out of the way to the bottom row
-            
-            node [shape=box, fixedsize=false, fontsize=9, style=filled, fillcolor=white, color="#CFD8DC"];
-            leg_tt   [label="TT = Temp Sensor Bubble", shape=circle, width=0.35, height=0.35];
-            leg_pt   [label="PT = Pressure Sensor Bubble", shape=circle, width=0.35, height=0.35];
-            leg_red  [label="Hot Supply Piping Loop", fontcolor="#D32F2F", color="#D32F2F", penwidth=2.5];
-            leg_blue [label="Cold Return Piping Loop", fontcolor="#1976D2", color="#1976D2", penwidth=2.5];
-        }}
+        LEGEND [
+            shape=plaintext,
+            style=none,
+            label=<
+                <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="8" CELLPADDING="4" BGCOLOR="#FFFFFF" COLOR="#90A4AE" STYLE="ROUNDED">
+                    <TR>
+                        <TD COLSPAN="6" ALIGN="CENTER"><B>DIAGRAM KEY &amp; ISA SYSTEM LEGEND</B></TD>
+                    </TR>
+                    <TR>
+                        <TD BGCOLOR="#FFFDE7" BORDER="1" COLOR="#263238"><B> TT </B> Temperature Transmitter</TD>
+                        <TD BGCOLOR="#E3F2FD" BORDER="1" COLOR="#263238"><B> PT </B> Pressure Transmitter</TD>
+                        <TD BGCOLOR="#E0F7FA" BORDER="1" COLOR="#263238"><B> LT </B> Level Transmitter</TD>
+                        <TD><FONT COLOR="#D32F2F"><B>━━━━▶</B></FONT> Hot Supply Pipe</TD>
+                        <TD><FONT COLOR="#1976D2"><B>━━━━▶</B></FONT> Cold Return Pipe</TD>
+                        <TD><FONT COLOR="#E65100"><B>━━━━▶</B></FONT> Heat Charging Pipe</TD>
+                    </TR>
+                </TABLE>
+            >
+        ];
+        
+        # Pins the legend down cleanly at the center baseline
+        {{ rank=sink; LEGEND }}
     }}
     """
     return pid
