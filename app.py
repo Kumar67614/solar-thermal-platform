@@ -22,20 +22,14 @@ st.set_page_config(
 )
 
 # =====================================================
-# SIDEBAR
+# SIDEBAR - CUSTOMER INPUTS
 # =====================================================
 
 st.sidebar.title("Customer Inputs")
 
 industry = st.sidebar.selectbox(
     "Industry",
-    [
-        "Dairy",
-        "Textile",
-        "Pharmaceutical",
-        "Chemical",
-        "Food"
-    ]
+    ["Dairy", "Textile", "Pharmaceutical", "Chemical", "Food"]
 )
 
 daily_water = st.sidebar.number_input(
@@ -59,17 +53,14 @@ ambient = st.sidebar.number_input(
 )
 
 irradiance = st.sidebar.slider(
-    "Solar Irradiance",
-    200,
-    1200,
-    800
+    "Solar Irradiance (W/m²)",
+    200, 1200, 800
 )
 
+# Changed label to reflect standard solar engineering terminology
 peak_hours = st.sidebar.slider(
-    "Peak Sun Hours",
-    1.0,
-    10.0,
-    5.5
+    "Equivalent Peak Sun Hours (h/day)",
+    1.0, 10.0, 5.5
 )
 
 latitude = st.sidebar.number_input(
@@ -77,18 +68,26 @@ latitude = st.sidebar.number_input(
     value=19.1
 )
 
+# Added: Conventional Boiler Efficiency to correct financial metrics
+boiler_efficiency = st.sidebar.slider(
+    "Existing Boiler Efficiency (%)",
+    50, 100, 75
+) / 100.0
+
+fuel_cost = st.sidebar.number_input(
+    "Fuel Cost ₹/kWh (Thermal equivalent)",
+    value=8
+)
+
 # =====================================================
-# COLLECTOR INPUTS
+# SIDEBAR - COLLECTOR PARAMETERS
 # =====================================================
 
 st.sidebar.header("Collector Parameters")
 
 collector_type = st.sidebar.selectbox(
     "Collector Type",
-    [
-        "Flat Plate Collector",
-        "ETC"
-    ]
+    ["Flat Plate Collector", "ETC"]
 )
 
 aperture_area = st.sidebar.number_input(
@@ -102,27 +101,27 @@ gross_area = st.sidebar.number_input(
 )
 
 collector_width = st.sidebar.number_input(
-    "Collector Width",
+    "Collector Width (m)",
     value=1.0
 )
 
 collector_height = st.sidebar.number_input(
-    "Collector Height",
+    "Collector Height (m)",
     value=2.0
 )
 
 eta0 = st.sidebar.number_input(
-    "η0",
+    "η0 (Optical Efficiency)",
     value=0.78
 )
 
 a1 = st.sidebar.number_input(
-    "a1",
+    "a1 (Linear Loss Coeff)",
     value=3.5
 )
 
 a2 = st.sidebar.number_input(
-    "a2",
+    "a2 (Quadratic Loss Coeff)",
     value=0.015
 )
 
@@ -131,67 +130,51 @@ flow_per_collector = st.sidebar.number_input(
     value=50
 )
 
-fuel_cost = st.sidebar.number_input(
-    "Fuel Cost ₹/kWh",
-    value=8
+# Added: Matrix routing parameters to fix hydraulic calculations
+st.sidebar.subheader("Array Configuration")
+collectors_in_series = st.sidebar.number_input(
+    "Collectors in Series per String",
+    value=4,
+    min_value=1
 )
 
 # =====================================================
 # THERMAL CALCULATION
 # =====================================================
 
-load = thermal_load(
-    daily_water,
-    tin,
-    tout
-)
+# Q = m * Cp * dT / 3600 -> Outlines daily thermal energy required
+load = thermal_load(daily_water, tin, tout)
 
-tm = (tin + tout)/2
+# NOTE: If this is a closed loop system, tm should dynamically track tank temperatures.
+# For a raw single-pass calculation, using the system mean:
+tm = (tin + tout) / 2
 
-eta = collector_efficiency(
-    eta0,
-    a1,
-    a2,
-    tm,
-    ambient,
-    irradiance
-)
+# Verify that your backend uses: eta = eta0 - a1*(tm-ambient)/irradiance - a2*((tm-ambient)**2)/irradiance
+eta = collector_efficiency(eta0, a1, a2, tm, ambient, irradiance)
 
-output = collector_output(
-    aperture_area,
-    eta,
-    irradiance
-)
+# Power output per collector based on APERTURE area (kW)
+output = collector_output(aperture_area, eta, irradiance) 
 
-daily_output = (
-    output *
-    peak_hours
-) / 1000
+# Daily energy yield per collector (kWh/day)
+daily_output = (output * peak_hours) / 1000
 
-collectors = collectors_required(
-    load,
-    daily_output
-)
+# Total number of collectors needed
+collectors = collectors_required(load, daily_output)
 
+# Total ground/roof footprint based on GROSS area
 total_area = collectors * gross_area
 
 # =====================================================
-# HYDRAULIC
+# HYDRAULIC CALCULATION (FIXED LOGIC)
 # =====================================================
 
-total_flow = collectors * flow_per_collector
+# Calculate parallel strings to prevent pipe sizing overestimation
+parallel_strings = int(np.ceil(collectors / collectors_in_series))
+total_flow = parallel_strings * flow_per_collector
 
-velocity = pipe_velocity(
-    total_flow
-)
-
-re = reynolds_number(
-    velocity
-)
-
-head = pump_head(
-    total_flow
-)
+velocity = pipe_velocity(total_flow)
+re = reynolds_number(velocity)
+head = pump_head(total_flow)
 
 # =====================================================
 # TABS
@@ -213,151 +196,72 @@ tabs = st.tabs([
 # =====================================================
 
 with tabs[0]:
-
     st.title("Industrial Solar Thermal Proposal Platform")
-
     st.subheader("Thermal Metrics")
-    c1,c2,c3,c4 = st.columns(4)
+    c1, c2, c3, c4 = st.columns(4)
 
-    c1.metric(
-        "Thermal Load",
-        f"{load:.1f} kWh/day"
-    )
-
-    c2.metric(
-        "Collectors",
-        collectors
-    )
-
-    c3.metric(
-        "Total Area",
-        f"{total_area:.1f} m²"
-    )
-
-    c4.metric(
-        "Flow Rate",
-        f"{total_flow:.1f} LPH"
-    )
+    c1.metric("Thermal Load", f"{load:.1f} kWh/day")
+    c2.metric("Collectors Required", f"{collectors} units")
+    c3.metric("Total Gross Area", f"{total_area:.1f} m²")
+    c4.metric("Actual System Flow Rate", f"{total_flow:.1f} LPH")
 
     st.divider()
 
     st.subheader("Financial Analysis")
     f1, f2, f3, f4 = st.columns(4)
 
-    cost = project_cost(
-        total_area
-    )
+    cost = project_cost(total_area)
 
-    savings = annual_savings(
-        load*300,
-        fuel_cost
-    )
+    # FIXED: Factored in boiler efficiency to show true displaced fuel savings
+    annual_energy_saved = load * 300 
+    savings = annual_savings(annual_energy_saved, fuel_cost) / boiler_efficiency
 
-    pb = payback(
-        cost,
-        savings
-    )
+    pb = payback(cost, savings)
+    
+    # Ensure your backend engine subtracts project_cost from discounted cumulative savings
+    n = npv(cost, savings, 20, 0.08)
 
-    n = npv(
-        cost,
-        savings,
-        20,
-        0.08
-    )
-
-    f1.metric(
-        "Project Cost",
-        f"₹ {cost:,.0f}"
-    )
-
-    f2.metric(
-        "Annual Savings",
-        f"₹ {savings:,.0f}"
-    )
-
-    f3.metric(
-        "Payback Period",
-        f"{pb:.2f} Years"
-    )
-
-    f4.metric(
-        "NPV (20 Years)",
-        f"₹ {n:,.0f}"
-    )
+    f1.metric("Project Cost", f"₹ {cost:,.0f}")
+    f2.metric("Annual Savings", f"₹ {savings:,.0f}")
+    f3.metric("Payback Period", f"{pb:.2f} Years")
+    f4.metric("NPV (20 Years)", f"₹ {n:,.0f}")
 
     st.divider()
 
     fig3 = payback_plot()
-
-    st.plotly_chart(
-        fig3,
-        width='stretch',
-        key='dashboard_payback'
-    )
+    st.plotly_chart(fig3, use_container_width=True, key='dashboard_payback')
 
 # =====================================================
 # THERMAL TAB
 # =====================================================
 
-
 with tabs[1]:
-
     st.header("Thermal Analysis")
+    st.write(f"Estimated Collector Operational Efficiency = **{eta*100:.2f} %**")
 
-    st.write(f"Collector Efficiency = {eta*100:.2f} %")
-
-    fig1 = efficiency_plot(
-        eta0,
-        a1,
-        a2,
-        irradiance
-    )
-
-    st.plotly_chart(
-        fig1,
-        width='stretch',
-        key='thermal_efficiency'
-    )
+    fig1 = efficiency_plot(eta0, a1, a2, irradiance)
+    st.plotly_chart(fig1, use_container_width=True, key='thermal_efficiency')
 
     fig2 = monthly_yield_plot()
-
-    st.plotly_chart(
-        fig2,
-        width='stretch',
-        key='thermal_monthly_yield'
-    )
+    st.plotly_chart(fig2, use_container_width=True, key='thermal_monthly_yield')
 
 # =====================================================
 # LAYOUT TAB
 # =====================================================
 
-
 with tabs[2]:
-
     st.header("Solar Field Layout")
 
-    pitch = spacing(
-        collector_height,
-        25,
-        latitude
-    )
+    pitch = spacing(collector_height, 25, latitude)
+    
+    # Layout matches the physical wiring constraints established in hydraulics
+    cols = parallel_strings
+    rows = collectors_in_series
 
-    cols = 5
+    st.write(f"Recommended Row Pitch (Anti-shading spacing) = **{pitch:.2f} m**")
+    st.write(f"Array Matrix Setup: **{rows} rows** deep $\\times$ **{cols} strings** wide")
 
-    rows = int(np.ceil(collectors/cols))
-
-    st.write(
-        f"Recommended Row Pitch = {pitch:.2f} m"
-    )
-
-    layout_fig = draw_layout(
-        rows,
-        cols,
-        collector_width,
-        collector_height,
-        pitch
-    )
-
+    layout_fig = draw_layout(rows, cols, collector_width, collector_height, pitch)
     st.pyplot(layout_fig)
 
 # =====================================================
@@ -365,19 +269,17 @@ with tabs[2]:
 # =====================================================
 
 with tabs[3]:
-
     st.header("Industrial P&ID (Piping & Instrumentation Diagram)")
-    
     st.subheader(f"System Configuration: {industry} Industry")
     
     col1, col2 = st.columns(2)
     with col1:
-        st.write(f"**Collectors:** {collectors}")
+        st.write(f"**Total Collectors:** {collectors}")
         st.write(f"**Daily Demand:** {daily_water} LPD")
-        st.write(f"**Outlet Temp:** {tout}°C")
+        st.write(f"**Target Outlet Temp:** {tout}°C")
     with col2:
-        st.write(f"**Total Flow:** {total_flow:.0f} LPH")
-        st.write(f"**Inlet Temp:** {tin}°C")
+        st.write(f"**Manifold Flow Rate:** {total_flow:.0f} LPH")
+        st.write(f"**Source Inlet Temp:** {tin}°C")
         st.write(f"**System Load:** {load:.1f} kWh/day")
 
     pid = generate_pid(
@@ -387,7 +289,6 @@ with tabs[3]:
         daily_water=daily_water,
         total_flow=total_flow
     )
-
     st.graphviz_chart(pid)
 
 # =====================================================
@@ -395,68 +296,24 @@ with tabs[3]:
 # =====================================================
 
 with tabs[4]:
+    st.header("Financial Analysis Breakdown")
 
-    st.header("Financial Analysis")
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("Project Cost", f"₹ {cost:,.0f}")
+    m2.metric("Annual Savings", f"₹ {savings:,.0f}")
+    m3.metric("Payback", f"{pb:.2f} Years")
+    m4.metric("NPV", f"₹ {n:,.0f}")
 
-    cost = project_cost(
-        total_area
-    )
-
-    savings = annual_savings(
-        load*300,
-        fuel_cost
-    )
-
-    pb = payback(
-        cost,
-        savings
-    )
-
-    n = npv(
-        cost,
-        savings,
-        20,
-        0.08
-    )
-
-    st.metric(
-        "Project Cost",
-        f"₹ {cost:,.0f}"
-    )
-
-    st.metric(
-        "Annual Savings",
-        f"₹ {savings:,.0f}"
-    )
-
-    st.metric(
-        "Payback",
-        f"{pb:.2f} Years"
-    )
-
-    st.metric(
-        "NPV",
-        f"₹ {n:,.0f}"
-    )
-
-    fig3 = payback_plot()
-
-    st.plotly_chart(
-        fig3,
-        width='stretch',
-        key='financial_payback'
-    )
+    fig3_financial = payback_plot()
+    st.plotly_chart(fig3_financial, use_container_width=True, key='financial_payback')
 
 # =====================================================
 # INTEGRATION TAB
 # =====================================================
 
-
 with tabs[5]:
-
     st.header("System Integration & Requirements")
-    
-    st.info(f"Detailed integration specifications for **{industry}** industry")
+    st.info(f"Detailed integration specifications for **{industry}** industry applications.")
     
     rec = recommendations(
         industry=industry,
@@ -465,7 +322,6 @@ with tabs[5]:
         total_flow=total_flow
     )
 
-    # Format recommendations by section
     current_section = None
     for item in rec:
         if item.startswith("###"):
@@ -473,7 +329,7 @@ with tabs[5]:
                 st.divider()
             st.subheader(item.replace("###", "").strip())
             current_section = item
-        elif item.startswith("•"):
+        elif item.startswith("•") or item.startswith("*"):
             st.write(item)
 
 # =====================================================
@@ -481,25 +337,17 @@ with tabs[5]:
 # =====================================================
 
 with tabs[6]:
-
     st.header("Installation Procedure")
-
     steps = installation_steps()
-
-    for i,s in enumerate(steps):
-
-        st.write(f"{i+1}. {s}")
+    for i, s in enumerate(steps):
+        st.write(f"**Step {i+1}:** {s}")
 
 # =====================================================
 # LITERATURE TAB
 # =====================================================
 
 with tabs[7]:
-
     st.header("Literature Survey")
-
     refs = literature()
-
     for r in refs:
-
         st.write(f"- {r}")
