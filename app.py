@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import math
 
 from engines.thermal_engine import *
 from engines.layout_engine import *
@@ -299,7 +300,6 @@ with tabs[0]:
 # THERMAL TAB
 # =====================================================
 
-
 with tabs[1]:
 
     st.header("Thermal Analysis")
@@ -331,39 +331,45 @@ with tabs[1]:
 # LAYOUT TAB
 # =====================================================
 
-
 with tabs[2]:
 
     st.header("Solar Field Layout")
+    
+    # 1. Provide clean layout controls directly in the view pane
+    st.subheader("Array Matrix Control Structure")
+    col_ui1, col_ui2, col_ui3 = st.columns(3)
+    
+    with col_ui1:
+        input_rows = st.number_input("Number of Rows", min_value=1, max_value=20, value=max(1, int(math.ceil(math.sqrt(collectors) / 2))))
+    with col_ui2:
+        input_cols = st.number_input("Collectors per Row (Columns)", min_value=1, max_value=50, value=max(1, int(math.ceil(collectors / input_rows))))
+    with col_ui3:
+        selected_tilt = st.slider("Collector Tilt Angle (°)", 0, 60, 30)
 
-    #  NEW FUNCTIONAL STREAMLIT INTEGRATION FLOW
-# 1. Fetch parameters safely from your "Customer Inputs" sidebar widgets
-# (Matches your UI values: 5000 LPD, 25°C to 80°C target, etc.)
-selected_tilt = st.sidebar.slider("Collector Tilt Angle (°)", 0, 60, 30)
-selected_lat = st.sidebar.number_input("Project Latitude (°)", value=23.5)
+    # 2. Track geometric constraints based on explicit user variables
+    winter_solstice_altitude = 90.0 - abs(latitude + 23.45)
+    vertical_rise = collector_height * math.sin(math.radians(selected_tilt))
+    panel_ground_footprint = collector_height * math.cos(math.radians(selected_tilt))
 
-# 2. Derive the ideal anti-shading geometry properties on-the-fly
-winter_solstice_altitude = 90.0 - abs(selected_lat + 23.45)
-vertical_rise = panel_height * math.sin(math.radians(selected_tilt))
-panel_ground_footprint = panel_height * math.cos(math.radians(selected_tilt))
+    # Calculate optimal anti-shading layout pitch
+    min_shading_space = vertical_rise / math.tan(math.radians(winter_solstice_altitude))
+    ideal_pitch_distance = panel_ground_footprint + min_shading_space + 0.5  # Adding a 0.5m maintenance clearance buffer
 
-# Safe minimum spacing limit calculation to prevent row clipping
-min_shading_space = vertical_rise / math.tan(math.radians(winter_solstice_altitude))
-ideal_pitch_distance = panel_ground_footprint + min_shading_space + 0.5  # Includes 0.5m buffer
+    # 3. Feed fully-mapped reactive parameters directly into your engine
+    fig = draw_layout(
+        rows=input_rows,
+        cols=input_cols,
+        width=collector_width,
+        height=collector_height,
+        pitch=ideal_pitch_distance,
+        tilt=selected_tilt,
+        latitude=latitude
+    )
 
-# 3. Pass values directly to your updated responsive drawing engine
-fig = draw_layout(
-    rows=input_rows,
-    cols=input_cols,
-    width=panel_width,
-    height=panel_height,
-    pitch=ideal_pitch_distance,     # Automatically responsive pitch injection
-    tilt=selected_tilt,
-    latitude=selected_lat
-)
+    # 4. Safely render layout charts
+    st.pyplot(fig)
 
-# 4. Render the clean layout to the user dashboard canvas
-st.pyplot(fig)# =====================================================
+# =====================================================
 # PID TAB
 # =====================================================
 
@@ -452,7 +458,7 @@ with tabs[4]:
 
 # =====================================================
 # SYSTEM INTEGRATION DASHBOARD VIEW TAB MODULE
-# ==============================================================================
+# =====================================================
 
 with tabs[5]:
     st.header("Real-Time System Integration Blueprint")
@@ -462,17 +468,20 @@ with tabs[5]:
     integration_blueprint = render_dynamic_integration_ui(
         industry=industry,                                           # Active industry selector
         tout=tout,                                                   # Target Outlet Temp Slider (°C)
-        tinlet=inlet_temp if 'inlet_temp' in locals() else 25,       # Inlet Temp Slider (°C)
-        tambient=ambient_temp if 'ambient_temp' in locals() else 30, # Ambient Temp Slider (°C)
+        tinlet=tin if 'tin' in locals() else 25,                     # Inlet Temp Slider (°C)
+        tambient=ambient if 'ambient' in locals() else 30,           # Ambient Temp Slider (°C)
         daily_water=daily_water,                                     # Processing Volume Load (LPD)
         total_flow=total_flow,                                       # Fluid circulation flow rate (LPH)
-        eta_0=0.75,                                                  # Intercept efficiency coefficient
-        a1=3.5,                                                      # First-order efficiency coefficient
-        a2=0.015                                                     # Second-order efficiency coefficient
+        eta_0=eta0 if 'eta0' in locals() else 0.75,                  # Intercept efficiency coefficient
+        a1=a1 if 'a1' in locals() else 3.5,                          # First-order efficiency coefficient
+        a2=a2 if 'a2' in locals() else 0.015                         # Second-order efficiency coefficient
     )
     
     # Render the interactive graphical cards array onto the application screen
-    st.html(integration_blueprint)# INSTALLATION TAB
+    st.html(integration_blueprint)
+
+# =====================================================
+# INSTALLATION TAB
 # =====================================================
 
 with tabs[6]:
