@@ -66,7 +66,6 @@ def draw_layout(rows, cols, width, height, pitch, tilt=30, latitude=23.5):
                              color='#0284c7', linewidth=0.5, alpha=0.3, zorder=3)
 
     # 4. MARGIN DIMENSION LINES (Dynamically shift offset targets based on input scale)
-    # A. Column Inter-Module Maintenance Gap (Calculated relative to the first block)
     if cols > 1:
         line_y = field_depth + (field_depth * 0.05)
         ax_main.plot([width, width], [field_depth, line_y + (field_depth * 0.01)], color='#DC2626', linestyle=':', linewidth=1)
@@ -76,7 +75,6 @@ def draw_layout(rows, cols, width, height, pitch, tilt=30, latitude=23.5):
         ax_main.text(width + (col_gap / 2), line_y + (field_depth * 0.005), f"{col_gap}m Gap", 
                      color='#DC2626', fontsize=9, ha='center', va='bottom', weight='bold')
 
-    # B. Integrated Structural Row Pitch Line (Dynamically scaled using a percentage-based left offset)
     if rows > 1:
         left_offset = -(field_width * 0.08)
         ax_main.plot([0, left_offset - (field_width * 0.01)], [0, 0], color='#1E40AF', linestyle=':', linewidth=1)
@@ -86,7 +84,6 @@ def draw_layout(rows, cols, width, height, pitch, tilt=30, latitude=23.5):
         ax_main.text(left_offset - (field_width * 0.01), pitch / 2, f"Row Pitch\n= {pitch:.2f} m", 
                      color='#1E40AF', fontsize=10, ha='right', va='center', weight='bold')
 
-        # C. Minimum Safe Ground Space Clearance Line (Dynamically scaled using a percentage-based right offset)
         right_offset = field_width + (field_width * 0.08)
         ax_main.plot([field_width, right_offset + (field_width * 0.01)], [height, height], color='#16A34A', linestyle=':', linewidth=1)
         ax_main.plot([field_width, right_offset + (field_width * 0.01)], [pitch, pitch], color='#16A34A', linestyle=':', linewidth=1)
@@ -99,7 +96,7 @@ def draw_layout(rows, cols, width, height, pitch, tilt=30, latitude=23.5):
                      f"Clear Space: {calculated_clear_space:.2f} m\n{status_label}", 
                      color=status_color, fontsize=10, ha='left', va='center', weight='bold')
 
-    # Apply adaptive scaling borders to map axes to keep visuals crisp across inputs
+    # Adaptive canvas boundaries
     pad_x = max(field_width * 0.18, 2.0)
     pad_y = max(field_depth * 0.12, 1.5)
     ax_main.set_xlim(-pad_x, field_width + pad_x)
@@ -111,40 +108,32 @@ def draw_layout(rows, cols, width, height, pitch, tilt=30, latitude=23.5):
     ax_main.set_ylabel("Field Depth Flow Distance (meters)", fontsize=10, color='#475569')
     ax_main.grid(True, linestyle='--', alpha=0.2, color='#64748B')
 
-    # 5. RENDER ELEVATION PROFILE WITH ADAPTIVE SHADOW GRAPHING
+    # 5. RENDER ELEVATION PROFILE
     ax_side.axhline(0, color='#334155', linewidth=3, zorder=1)
     
-    # Compute component layout adjustments for slope modeling
     angle_rad = math.radians(tilt)
     dx = height * math.cos(angle_rad)
     dy = height * math.sin(angle_rad)
     
-    # Draw responsive collector rows side-slants
     ax_side.plot([0, dx], [0, dy], color='#1E3A8A', linewidth=4, zorder=3, label='Collector Slant')
     ax_side.plot([dx, dx], [0, dy], color='#94A3B8', linestyle=':', linewidth=1)
-    
     ax_side.plot([pitch, pitch + dx], [0, dy], color='#1E3A8A', linewidth=4, zorder=3)
     ax_side.plot([pitch + dx, pitch + dx], [0, dy], color='#94A3B8', linestyle=':', linewidth=1)
 
-    # Compute ray length and scale dynamic winter shadow profiles
     solstice_rad = math.radians(winter_solstice_altitude)
     projected_ray_length = dy / math.tan(solstice_rad)
     ax_side.plot([dx, dx + projected_ray_length], [dy, 0], color='#EA580C', linestyle='--', linewidth=1.8, label='Solstice Sun Ray')
     
-    # Generate visual shading patch area under the panels
     shadow_zone = patches.Polygon([[dx, 0], [dx, dy], [dx + projected_ray_length, 0]], facecolor='#F8FAFC', alpha=0.8, zorder=2)
     ax_side.add_patch(shadow_zone)
     
-    # Clear space measurement indicator arrow
     ax_side.annotate('', xy=(dx, -0.08), xytext=(pitch, -0.08),
                      arrowprops=dict(arrowstyle='<->', color='#16A34A', linewidth=1.2))
     ax_side.text((dx + pitch) / 2, -0.15, f"Clear space\n{calculated_clear_space:.2f}m", 
                  color='#15803D', fontsize=9, ha='center', va='top', weight='bold')
 
-    # Active tilt angle indicator text label
     ax_side.text(dx * 0.3, 0.05, f"{tilt}°", color='#1D4ED8', fontsize=9, weight='bold')
 
-    # Apply auto-scaling viewing window margins to the side-profile sub-graph
     ax_side.set_xlim(-0.5, max(pitch + dx + 0.8, dx + projected_ray_length + 0.5))
     ax_side.set_ylim(-0.4, dy + 0.6)
     ax_side.set_aspect('equal')
@@ -153,3 +142,10 @@ def draw_layout(rows, cols, width, height, pitch, tilt=30, latitude=23.5):
     ax_side.legend(loc='upper right', fontsize=8, framealpha=0.9)
 
     return fig
+
+# --- DYNAMIC CUSTOMER DATA CALL ---
+# 52 total units split across 4 rows = 13 columns.
+# Standard industrial module size assumed: 1.2m width x 1.2m height.
+# Row Pitch set exactly to customer specifications: 3.15 meters.
+fig = draw_layout(rows=4, cols=13, width=1.2, height=1.2, pitch=3.15, tilt=30, latitude=23.5)
+plt.show()
