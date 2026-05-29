@@ -28,91 +28,136 @@ from engines.financial_engine import (
 )
 
 # =====================================================
-# PREMIUM HIGH-RESOLUTION PDF COMPILER FUNCTION
+# COMPREHENSIVE PDF GENERATOR WITH FAILSAFE ENGINE
 # =====================================================
 def compile_proposal_pdf_document(industry, load, collectors, total_area, total_flow, cost, savings, payback, npv_val, collector_type, rows, cols):
     """
-    Generates a beautifully styled, print-ready layout.
-    Injects realistic data metrics from all major tabs into a clean binary buffer stream.
+    Attempts high-fidelity HTML-to-PDF compilation via WeasyPrint.
+    If WeasyPrint/Pango dependencies are missing, handles it gracefully by
+    compiling a clean, valid PDF binary stream via fpdf2 to guarantee readability.
     """
-    html_template = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="utf-8">
-        <style>
-            @page {{
-                size: A4;
-                margin: 20mm 15mm;
-                @bottom-right {{
-                    content: "Page " counter(page);
-                    font-family: Arial, sans-serif;
-                    font-size: 8pt;
-                    color: #64748b;
-                }}
-            }}
-            body {{ font-family: Arial, sans-serif; color: #1e293b; margin: 0; line-height: 1.5; font-size: 10pt; }}
-            .header {{ background-color: #0f172a; color: #ffffff; padding: 25px; border-radius: 6px; margin-bottom: 25px; }}
-            .header h1 {{ margin: 0; font-size: 22px; font-weight: 700; }}
-            .header p {{ margin: 5px 0 0 0; color: #38bdf8; font-size: 13px; }}
-            h2 {{ color: #0284c7; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; margin-top: 25px; page-break-after: avoid; }}
-            table {{ width: 100%; border-collapse: collapse; margin-top: 12px; margin-bottom: 20px; }}
-            th {{ background-color: #f8fafc; color: #475569; text-align: left; padding: 8px 10px; font-size: 12px; border-bottom: 2px solid #cbd5e1; }}
-            td {{ padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 12px; }}
-            .highlight-box {{ background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 12px; margin-top: 20px; border-radius: 0 4px 4px 0; }}
-            .highlight-box p {{ margin: 0; color: #14532d; font-weight: bold; font-size: 12px; }}
-            .list-item {{ margin-bottom: 8px; font-size: 12px; }}
-        </style>
-    </head>
-    <body>
-        <div class="header">
-            <h1>Industrial Solar Thermal Project Proposal</h1>
-            <p>Comprehensive Engineering Assessment, Sizing Validation & Lifecycle Return Ledger</p>
-        </div>
-        
-        <h2>1. Executive Application Profile</h2>
-        <p>This automated industrial proposal document details the thermodynamic capacity models, field array layouts, and lifecycle returns configured for integration at the <strong>{industry}</strong> plant facility.</p>
-        
-        <h2>2. Technical Design & Hydraulic Sizing Framework</h2>
-        <table>
-            <thead>
-                <tr><th>Design Sizing Parameter</th><th>Calculated Specification Target</th></tr>
-            </thead>
-            <tbody>
-                <tr><td>Calculated Utility Process Thermal Load</td><td><strong>{load:.1f} kWh / Day</strong></td></tr>
-                <tr><td>Selected Collector Technology Matrix</td><td><strong>{collector_type} Array</strong></td></tr>
-                <tr><td>Required Solar Collector Modules Count</td><td><strong>{collectors} Units ({rows} Rows × {cols} Columns)</strong></td></tr>
-                <tr><td>Total Field Footprint Gross Area</td><td><strong>{total_area:.1f} m²</strong></td></tr>
-                <tr><td>Balanced Design Loop Flow Rate (Parallel)</td><td><strong>{total_flow:.1f} LPH</strong></td></tr>
-            </tbody>
-        </table>
-
-        <h2>3. Commercial Investment Ledger</h2>
-        <table>
-            <thead>
-                <tr><th>Financial Milestone Metric</th><th>Projected Lifecycle Return Yield</th></tr>
-            </thead>
-            <tbody>
-                <tr><td>Estimated Initial Capital Outlay (CapEx)</td><td><strong>₹ {cost:,.0f}</strong></td></tr>
-                <tr><td>Year 1 Displaced Boiler Fuel Savings</td><td><strong>₹ {savings:,.0f}</strong></td></tr>
-                <tr><td>Dynamic Lifecycle Payback Period Window</td><td><strong>{payback:.2f} Years</strong></td></tr>
-                <tr><td>Project Net Present Value (20-Yr NPV)</td><td><strong>₹ {npv_val:,.0f}</strong></td></tr>
-            </tbody>
-        </table>
-
-        <h2>4. Construction & Quality Sign-Off Blueprint</h2>
-        <div class="list-item"><strong>• Site Alignment Groundwork:</strong> Anchor racking tracks safely into structural roof beams using laser transit lines.</div>
-        <div class="list-item"><strong>• Module Fixed Tilt Assembly:</strong> Clamp panels coplanarly to distribute wind and structural loads evenly.</div>
-        <div class="list-item"><strong>• Pressure Integrity Audit:</strong> Perform an on-site hydrostatic test by holding the water loop at 1.5x design pressure for 24 hours to confirm leak-free plumbing.</div>
-        <div class="list-item"><strong>• Loss Shield Insulation:</strong> Wrap manifolds in mineral wool jackets under aluminum covers to preserve utility heat.</div>
-    </body>
-    </html>
-    """
+    # 1. Primary Engine Attempt: Weasyprint
     try:
         from weasyprint import HTML
+        html_template = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <style>
+                @page {{ size: A4; margin: 20mm 15mm; }}
+                body {{ font-family: Arial, sans-serif; color: #1e293b; margin: 0; line-height: 1.5; font-size: 10pt; }}
+                .header {{ background-color: #0f172a; color: #ffffff; padding: 25px; border-radius: 6px; margin-bottom: 25px; }}
+                .header h1 {{ margin: 0; font-size: 22px; font-weight: 700; }}
+                .header p {{ margin: 5px 0 0 0; color: #38bdf8; font-size: 13px; }}
+                h2 {{ color: #0284c7; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; margin-top: 25px; }}
+                table {{ width: 100%; border-collapse: collapse; margin-top: 12px; margin-bottom: 20px; }}
+                th {{ background-color: #f8fafc; color: #475569; text-align: left; padding: 8px 10px; font-size: 12px; border-bottom: 2px solid #cbd5e1; }}
+                td {{ padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 12px; }}
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>Industrial Solar Thermal Project Proposal</h1>
+                <p>Comprehensive Engineering Assessment & Lifecycle Return Ledger</p>
+            </div>
+            <h2>1. Technical Design & Hydraulic Sizing Framework</h2>
+            <table>
+                <tr><th>Design Parameter</th><th>Calculated Specification Target</th></tr>
+                <tr><td>Utility Process Thermal Load</td><td>{load:.1f} kWh / Day</td></tr>
+                <tr><td>Collector Technology Matrix</td><td>{collector_type} Array</td></tr>
+                <tr><td>Modules Count</td><td>{collectors} Units ({rows} Rows × {cols} Columns)</td></tr>
+                <tr><td>Total Field Footprint Gross Area</td><td>{total_area:.1f} m²</td></tr>
+                <tr><td>Design Loop Flow Rate</td><td>{total_flow:.1f} LPH</td></tr>
+            </table>
+            <h2>2. Commercial Investment Ledger</h2>
+            <table>
+                <tr><th>Financial Milestone Metric</th><th>Projected Lifecycle Return Yield</th></tr>
+                <tr><td>Estimated Initial Capital Outlay (CapEx)</td><td>₹ {cost:,.0f}</td></tr>
+                <tr><td>Year 1 Fuel Displaced Savings</td><td>₹ {savings:,.0f}</td></tr>
+                <tr><td>Dynamic Payback Period Window</td><td>{payback:.2f} Years</td></tr>
+                <tr><td>Project Net Present Value (20-Yr NPV)</td><td>₹ {npv_val:,.0f}</td></tr>
+            </table>
+        </body>
+        </html>
+        """
         return HTML(string=html_template).write_pdf()
     except Exception:
-        return bytes(html_template, 'utf-8')
+        # 2. Universal Failsafe Backup Engine: FPDF2 (Ensures valid openable binary)
+        try:
+            from fpdf import FPDF
+        except ImportError:
+            st.error("Missing PDF runtime dependency. Please run: pip install fpdf2")
+            return None
+
+        class FPDFProposal(FPDF):
+            def header(self):
+                self.set_fill_color(15, 23, 42) # Dark Indigo Banner
+                self.rect(0, 0, 210, 40, 'F')
+                self.set_font("Helvetica", "B", 18)
+                self.set_text_color(255, 255, 255)
+                self.set_y(12)
+                self.cell(0, 0, "Industrial Solar Thermal Project Proposal", ln=1, align="C")
+                self.set_font("Helvetica", "", 10)
+                self.set_text_color(56, 189, 248)
+                self.set_y(22)
+                self.cell(0, 0, f"Engineered Specification Report — {industry} Plant Application", ln=1, align="C")
+                self.set_y(45)
+
+            def footer(self):
+                self.set_y(-15)
+                self.set_font("Helvetica", "I", 8)
+                self.set_text_color(100, 116, 139)
+                self.cell(0, 10, f"Page {self.page_no()}", align="R")
+
+        pdf = FPDFProposal()
+        pdf.add_page()
+        pdf.set_margins(15, 20, 15)
+        
+        # Section 1 Header
+        pdf.set_text_color(2, 132, 199)
+        pdf.set_font("Helvetica", "B", 14)
+        pdf.cell(0, 10, "1. Technical Design & Hydraulic Sizing Framework", ln=1)
+        pdf.line(15, pdf.get_y(), 195, pdf.get_y())
+        pdf.ln(4)
+        
+        # Table 1 Data
+        pdf.set_font("Helvetica", "", 10)
+        pdf.set_text_color(30, 41, 59)
+        tech_metrics = [
+            ("Utility Process Thermal Load", f"{load:.1f} kWh / Day"),
+            ("Selected Collector Technology", f"{collector_type} Array"),
+            ("Required Collector Modules Count", f"{collectors} Units ({rows} R x {cols} C)"),
+            ("Total Field Footprint Gross Area", f"{total_area:.1f} m2"),
+            ("Balanced Loop Flow Rate (Parallel)", f"{total_flow:.1f} LPH")
+        ]
+        for label, val in tech_metrics:
+            pdf.cell(100, 8, label, border="B")
+            pdf.cell(80, 8, val, border="B", ln=1, align="R")
+            
+        pdf.ln(10)
+        
+        # Section 2 Header
+        pdf.set_text_color(2, 132, 199)
+        pdf.set_font("Helvetica", "B", 14)
+        pdf.cell(0, 10, "2. Commercial Investment Ledger", ln=1)
+        pdf.line(15, pdf.get_y(), 195, pdf.get_y())
+        pdf.ln(4)
+        
+        # Table 2 Data
+        pdf.set_font("Helvetica", "", 10)
+        pdf.set_text_color(30, 41, 59)
+        fin_metrics = [
+            ("Estimated Initial Capital Outlay (CapEx)", f"INR {cost:,.0f}"),
+            ("Year 1 Displaced Fuel Savings", f"INR {savings:,.0f}"),
+            ("Dynamic Lifecycle Payback Period Window", f"{payback:.2f} Years"),
+            ("Project Net Present Value (20-Yr NPV)", f"INR {npv_val:,.0f}")
+        ]
+        for label, val in fin_metrics:
+            pdf.cell(100, 8, label, border="B")
+            pdf.cell(80, 8, val, border="B", ln=1, align="R")
+
+        return pdf.output()
 
 
 # =====================================================
@@ -238,7 +283,7 @@ total_area = collectors * gross_area
 calculated_rows = max(1, int(math.ceil(math.sqrt(collectors) / 2)))
 calculated_cols = max(1, int(math.ceil(collectors / calculated_rows)))
 
-# Fixed hydraulic flow based on parallel layout calculation
+# Balanced Loop Flow Equation
 total_flow = calculated_rows * flow_per_collector
 velocity = pipe_velocity(total_flow)
 re = reynolds_number(velocity)
@@ -260,20 +305,26 @@ savings_dash = calculate_real_annual_savings(annual_energy_yield_kwh=annual_ener
 pb_dash = calculate_dynamic_payback(initial_investment=cost_dash, year_one_savings=savings_dash, fuel_escalation=0.06, opex_rate=0.015)
 n_dash = calculate_comprehensive_npv(initial_investment=cost_dash, year_one_savings=savings_dash, lifecycle_years=20, discount_rate=0.08, fuel_escalation=0.06, opex_rate=0.015)
 
-# PDF Generation Stream
+# =====================================================
+# SAFE DOWNLOAD TRIGGER RUNTIME
+# =====================================================
 pdf_data_buffer = compile_proposal_pdf_document(
     industry=industry, load=load, collectors=collectors, total_area=total_area, 
     total_flow=total_flow, cost=cost_dash, savings=savings_dash, payback=pb_dash, 
     npv_val=n_dash, collector_type=collector_type, rows=calculated_rows, cols=calculated_cols
 )
+
 st.sidebar.markdown("---")
-st.sidebar.download_button(
-    label="📥 Download Proposal PDF",
-    data=pdf_data_buffer,
-    file_name=f"Solar_Thermal_Proposal_{industry}.pdf",
-    mime="application/pdf",
-    use_container_width=True
-)
+if pdf_data_buffer:
+    st.sidebar.download_button(
+        label="📥 Download Proposal PDF",
+        data=pdf_data_buffer,
+        file_name=f"Solar_Thermal_Proposal_{industry}.pdf",
+        mime="application/pdf",
+        use_container_width=True
+    )
+else:
+    st.sidebar.error("Error creating PDF document.")
 
 # =====================================================
 # SYSTEM INTERFACE TABS
@@ -302,7 +353,7 @@ with tabs[0]:
     c1.metric("Calculated Process Load", f"{load:.1f} kWh / Day")
     c2.metric("Required Modules Count", f"{collectors} Units")
     c3.metric("Total Field Gross Footprint", f"{total_area:.1f} m²")
-    c4.metric("Design Hydraulic Loop Flow", f"{total_flow:.1f} LPH (Parallel Configuration)")
+    c4.metric("Design Hydraulic Loop Flow", f"{total_flow:.1f} LPH (Parallel Loop)")
 
     # Row 2: Financial Metrics
     st.subheader("💰 Investment Returns Summary")
@@ -319,11 +370,8 @@ with tabs[0]:
     # =====================================================
     st.subheader("📊 Dynamic Graphical Analysis Suite (Updates with Inputs)")
     
-    # ROW 1 OF GRAPHS
     g_row1_c1, g_row1_c2 = st.columns(2)
-    
     with g_row1_c1:
-        # GRAPH 1: HWB Collector Efficiency Profile
         param_x_range = np.linspace(0.0, 0.12, 100)
         efficiency_curve = eta0 - (a1 * param_x_range) - (a2 * (param_x_range ** 2) * irradiance / 1000.0)
         efficiency_curve = np.clip(efficiency_curve, 0, 1) * 100.0
@@ -337,7 +385,6 @@ with tabs[0]:
         st.plotly_chart(fig_hwb, use_container_width=True, key='graph_hwb_profile')
 
     with g_row1_c2:
-        # GRAPH 2: Volumetric Fluid Input vs Thermal Load Requirement
         water_range_lpd = np.linspace(max(1000, daily_water - 4000), daily_water + 4000, 50)
         calculated_kwh_range = (water_range_lpd * 4.186 * (tout - tin)) / 3600.0
         
@@ -347,11 +394,8 @@ with tabs[0]:
         fig_vol.update_layout(title="<b>2. Fluid Volume Input vs Thermal Load Requirement</b>", xaxis_title="Daily Water Capacity (LPD)", yaxis_title="Energy Load (kWh/Day)", plot_bgcolor="#ffffff", height=350, margin=dict(l=10, r=10, t=40, b=10))
         st.plotly_chart(fig_vol, use_container_width=True, key='graph_volumetric_load')
 
-    # ROW 2 OF GRAPHS
     g_row2_c1, g_row2_c2 = st.columns(2)
-    
     with g_row2_c1:
-        # GRAPH 3: Year-Long Monthly Thermal Yield & Solar Fraction
         fig_perf = make_subplots(specs=[[{"secondary_y": True}]])
         fig_perf.add_trace(go.Bar(x=df_analytics["Month"], y=df_analytics["Collector Yield (kWh/day)"], name="Thermal Yield (kWh)", marker_color="#0284c7"), secondary_y=False)
         fig_perf.add_trace(go.Scatter(x=df_analytics["Month"], y=df_analytics["Solar Fraction (%)"], name="Solar Fraction (%)", mode="lines+markers", line=dict(color="#16a34a", width=2)), secondary_y=True)
@@ -361,7 +405,6 @@ with tabs[0]:
         st.plotly_chart(fig_perf, use_container_width=True, key='graph_seasonal_profile')
 
     with g_row2_c2:
-        # GRAPH 4: Monthly Operational Cost Shield & Carbon Offsets
         fig_save = make_subplots(specs=[[{"secondary_y": True}]])
         fig_save.add_trace(go.Bar(x=df_analytics["Month"], y=df_analytics["Fuel Saved (Liters/month)"], name="Fuel Saved (L)", marker_color="#ea580c"), secondary_y=False)
         fig_save.add_trace(go.Scatter(x=df_analytics["Month"], y=df_analytics["CO2 Mitigated (kg/month)"] / 1000.0, name="CO2 Abated (Tons)", mode="lines+markers", line=dict(color="#047857", width=2, dash="dash")), secondary_y=True)
@@ -370,9 +413,7 @@ with tabs[0]:
         fig_save.update_yaxes(title_text="CO2 Mitigated (Metric Tons)", secondary_y=True)
         st.plotly_chart(fig_save, use_container_width=True, key='graph_sustainability_profile')
 
-    # ROW 3: HORIZON PAYBACK TIMELINE
     st.markdown("---")
-    # GRAPH 5: Long-Term Payback Horizon Curve
     df_timeline_dash = generate_financial_timeline_dataframe(initial_investment=cost_dash, year_one_savings=savings_dash, lifecycle_years=15, discount_rate=0.08, fuel_escalation=0.06, opex_rate=0.015)
     fig_dash_payback = go.Figure()
     fig_dash_payback.add_shape(type="line", x0=0, y0=0, x1=15, y1=0, line=dict(color="#cbd5e1", width=2, dash="dash"))
@@ -381,7 +422,7 @@ with tabs[0]:
     st.plotly_chart(fig_dash_payback, use_container_width=True, key='graph_payback_profile')
 
 # =====================================================
-# RETAIN STANDARD BACKEND MODULE TABS
+# REMAINING SYSTEM TABS
 # =====================================================
 with tabs[1]:
     st.header("Advanced Seasonal Matrix")
