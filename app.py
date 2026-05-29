@@ -390,66 +390,59 @@ def render_dynamic_integration_ui(industry="Dairy", tout=80, tinlet=25, tambient
     return html
 
 # =====================================================
-import streamlit as st  # Assuming Streamlit based on the UI style; adapt if using Dash/HTML
-from engines.integration_engine import generate_integration_report
+# SYSTEM INITIALIZATION & PAGE CONFIG
+# =====================================================
+st.set_page_config(
+    page_title="Industrial Solar Thermal Platform",
+    layout="wide"
+)
 
-def render_integration_tab(customer_inputs):
-    """
-    Renders the Integration tab UI dynamically based on live customer inputs
-    collected from the Dashboard tab.
-    """
-    st.header("System Integration Dashboard")
-    
-    # 1. Fetch the dynamic diagram and steps from your research engine
-    report = generate_integration_report(
-        process_load_kwh=customer_inputs["process_load"],
-        modules_count=customer_inputs["modules_count"],
-        field_area_m2=customer_inputs["field_area"],
-        flow_rate_lph=customer_inputs["flow_rate"],
-        main_pipe_dn=customer_inputs["pipe_size"]
-    )
-    
-    # 2. Render the Metric Cards dynamically (Replacing the hardcoded green box)
-    st.markdown("### 🛠️ Live Solar System Parts Connector")
-    st.caption("Simple Setup Guide based on current customer configurations")
-    
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric(label="TOTAL PANEL SIZE", value=f"{customer_inputs['field_area']} m²", delta="Dynamic")
-    with col2:
-        st.metric(label="DAILY SOLAR HEAT MADE", value=f"{customer_inputs['process_load']} kWh", delta="Calculated")
-    with col3:
-        st.metric(label="REQUIRED MODULES", value=f"{customer_inputs['modules_count']} Units")
-    with col4:
-        st.metric(label="MAIN PIPE THICKNESS", value=f"DN {customer_inputs['pipe_size']}", delta="Optimized Velocity")
+# =====================================================
+# SIDEBAR CUSTOMER INPUTS
+# =====================================================
+st.sidebar.title("Customer Inputs")
 
-    st.markdown("---")
-    
-    # 3. Render the Pictorial Diagram dynamically inside a clean code/preformatted block
-    st.markdown("### 📊 Live Pictorial Layout Blueprint")
-    st.code(report["diagram"], language="text")
-    
-    st.markdown("---")
-    
-    # 4. Render the step-by-step matching instructions
-    st.markdown("### 📋 Actionable Field Integration Steps")
-    for step in report["steps"]:
-        with st.expander(step["phase"], expanded=True):
-            st.write(step["action"])
+industry = st.sidebar.selectbox(
+    "Industry Type",
+    ["Dairy", "Textile", "Pharmaceutical", "Chemical", "Food"]
+)
 
-# --- Example of how your main app coordinates state across tabs ---
-if "customer_data" not in st.session_state:
-    # Default fallback data if they haven't touched the dashboard yet
-    st.session_state.customer_data = {
-        "process_load": 279.1,
-        "modules_count": 42,
-        "field_area": 512.4,
-        "flow_rate": 2100.0,
-        "pipe_size": 25
-    }
+daily_water = st.sidebar.number_input(
+    "Daily Water Requirement (LPD)",
+    value=5000
+)
 
-# When user clicks the "Integration" tab, call the render function with live state
-# render_integration_tab(st.session_state.customer_data)====
+tin = st.sidebar.number_input(
+    "Inlet Temperature (°C)",
+    value=25
+)
+
+tout = st.sidebar.number_input(
+    "Outlet Temperature (°C)",
+    value=80
+)
+
+ambient = st.sidebar.number_input(
+    "Ambient Temperature (°C)",
+    value=30
+)
+
+irradiance = st.sidebar.slider(
+    "Solar Irradiance (W/m²)",
+    200, 1200, 800
+)
+
+peak_hours = st.sidebar.slider(
+    "Peak Sun Hours / Day",
+    1.0, 10.0, 5.5
+)
+
+latitude = st.sidebar.number_input(
+    "Site Latitude",
+    value=19.1
+)
+
+# =====================================================
 # SIDEBAR COLLECTOR PARAMETERS
 # =====================================================
 st.sidebar.header("Collector Parameters")
@@ -507,18 +500,6 @@ fuel_cost = st.sidebar.number_input(
 # =====================================================
 # AUTOMATED CALCULATION ENGINES RUNTIME
 # =====================================================
-# This must come BEFORE line 510
-def thermal_load(daily_water, tin, tout):
-    # Your math formulas for calculating kWh go here...
-    density = 1000 # kg/m3
-    specific_heat = 4.186 # kJ/kg°C
-    # ...
-    return calculated_kwh
-
-# ... (other code) ...
-
-# Line 510 will now work safely down here
-load = thermal_load(daily_water, tin, tout)
 load = thermal_load(daily_water, tin, tout)
 tm = (tin + tout) / 2.0
 
