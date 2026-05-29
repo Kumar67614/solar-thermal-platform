@@ -1,9 +1,36 @@
+def get_system_diagram():
+    """
+    Returns a text-based pictorial diagram of the installation flow.
+    """
+    return """
+    ========================================================================================
+                                INDUSTRIAL SOLAR THERMAL FLOW DIAGRAM
+    ========================================================================================
+    
+       [ SUNLIGHT ] 
+            │
+            ▼
+      ┌───────────┐         Hot Water          ┌──────────────┐         To Process Tank
+      │   SOLAR   │───────────────────────────>│     HEAT     │─────────────────────────> (Dairy/Factory)
+      │  PANELS   │                            │  EXCHANGER   │
+      └───────────┘                            └──────────────┘
+            ▲                                         ▲
+            │                                         │
+      ┌───────────┐                                   │ Cold Water
+      │ WATER PUMP│<──────────────────────────────────┘ Return
+      └───────────┘
+            ▲
+            │ (Fresh Feed / Makeup Water)
+     
+    ========================================================================================
+    """
+
 def installation_steps():
     """
-    Returns a simple, easy-to-read list of steps for setting up 
-    the solar water heating system on-site.
+    Returns the visual diagram followed by the step-by-step 
+    on-site assembly instructions.
     """
-    return [
+    steps = [
         {
             "step": "Site Inspection & Foundation Check",
             "description": (
@@ -24,7 +51,7 @@ def installation_steps():
             "step": "Mounting the Solar Panels",
             "description": (
                 "Lift the solar panels carefully onto the metal stands. "
-                "Clamps them down securely to make sure they do not move or slide. "
+                "Clamp them down securely to make sure they do not move or slide. "
                 "Leave a small gap between the panel rows so they do not shade one another."
             )
         },
@@ -69,3 +96,16 @@ def installation_steps():
             )
         }
     ]
+    
+    return {
+        "diagram": get_system_diagram(),
+        "steps": steps
+    }
+
+# Quick run test
+if __name__ == "__main__":
+    data = installation_steps()
+    print(data["diagram"])
+    for index, s in enumerate(data["steps"], 1):
+        print(f"{index}. {s['step']}")
+        print(f"   {s['description']}\n")
