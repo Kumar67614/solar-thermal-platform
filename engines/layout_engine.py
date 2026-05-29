@@ -35,7 +35,7 @@ def draw_layout(rows, cols, width, height, pitch, tilt=30, latitude=23.5):
     calculated_clear_space = pitch - panel_ground_footprint
     col_gap = 0.40  # Standardized maintenance walkway between module strings (columns)
     
-    # Calculate comprehensive system outer plant bounds
+    # Calculate comprehensive system outer plant bounds dynamically
     field_width = (cols * width) + ((cols - 1) * col_gap)
     field_depth = ((rows - 1) * pitch) + height
 
@@ -66,42 +66,42 @@ def draw_layout(rows, cols, width, height, pitch, tilt=30, latitude=23.5):
                              color='#0284c7', linewidth=0.5, alpha=0.3, zorder=3)
 
     # 4. MARGIN DIMENSION LINES (Dynamically shift offset targets based on input scale)
-    # A. Column Inter-Module Maintenance Gap (Top Exterior Boundary Margin)
+    # A. Column Inter-Module Maintenance Gap (Calculated relative to the first block)
     if cols > 1:
-        line_y = field_depth + (height * 0.15)
-        ax_main.plot([width, width], [field_depth, line_y + 0.1], color='#DC2626', linestyle=':', linewidth=1)
-        ax_main.plot([width + col_gap, width + col_gap], [field_depth, line_y + 0.1], color='#DC2626', linestyle=':', linewidth=1)
+        line_y = field_depth + (field_depth * 0.05)
+        ax_main.plot([width, width], [field_depth, line_y + (field_depth * 0.01)], color='#DC2626', linestyle=':', linewidth=1)
+        ax_main.plot([width + col_gap, width + col_gap], [field_depth, line_y + (field_depth * 0.01)], color='#DC2626', linestyle=':', linewidth=1)
         ax_main.annotate('', xy=(width, line_y), xytext=(width + col_gap, line_y),
                          arrowprops=dict(arrowstyle='<->', color='#DC2626', linewidth=1.2))
-        ax_main.text(width + (col_gap / 2), line_y + 0.05, f"{col_gap}m Gap", 
+        ax_main.text(width + (col_gap / 2), line_y + (field_depth * 0.005), f"{col_gap}m Gap", 
                      color='#DC2626', fontsize=9, ha='center', va='bottom', weight='bold')
 
-    # B. Integrated Structural Row Pitch Line (Left Boundary Margin)
+    # B. Integrated Structural Row Pitch Line (Dynamically scaled using a percentage-based left offset)
     if rows > 1:
-        left_offset = -(field_width * 0.10)
-        ax_main.plot([0, left_offset - 0.1], [0, 0], color='#1E40AF', linestyle=':', linewidth=1)
-        ax_main.plot([0, left_offset - 0.1], [pitch, pitch], color='#1E40AF', linestyle=':', linewidth=1)
+        left_offset = -(field_width * 0.08)
+        ax_main.plot([0, left_offset - (field_width * 0.01)], [0, 0], color='#1E40AF', linestyle=':', linewidth=1)
+        ax_main.plot([0, left_offset - (field_width * 0.01)], [pitch, pitch], color='#1E40AF', linestyle=':', linewidth=1)
         ax_main.annotate('', xy=(left_offset, 0), xytext=(left_offset, pitch),
                          arrowprops=dict(arrowstyle='<->', color='#1E40AF', linewidth=1.5))
-        ax_main.text(left_offset - 0.05, pitch / 2, f"Row Pitch\n= {pitch:.2f} m", 
+        ax_main.text(left_offset - (field_width * 0.01), pitch / 2, f"Row Pitch\n= {pitch:.2f} m", 
                      color='#1E40AF', fontsize=10, ha='right', va='center', weight='bold')
 
-        # C. Minimum Safe Ground Space Clearance Line (Right Boundary Margin)
-        right_offset = field_width + (field_width * 0.10)
-        ax_main.plot([field_width, right_offset + 0.1], [height, height], color='#16A34A', linestyle=':', linewidth=1)
-        ax_main.plot([field_width, right_offset + 0.1], [pitch, pitch], color='#16A34A', linestyle=':', linewidth=1)
+        # C. Minimum Safe Ground Space Clearance Line (Dynamically scaled using a percentage-based right offset)
+        right_offset = field_width + (field_width * 0.08)
+        ax_main.plot([field_width, right_offset + (field_width * 0.01)], [height, height], color='#16A34A', linestyle=':', linewidth=1)
+        ax_main.plot([field_width, right_offset + (field_width * 0.01)], [pitch, pitch], color='#16A34A', linestyle=':', linewidth=1)
         ax_main.annotate('', xy=(right_offset, height), xytext=(right_offset, pitch),
                          arrowprops=dict(arrowstyle='<->', color='#16A34A', linewidth=1.5))
         
         status_label = "⚠️ Shading Risk" if is_shading_risk else "✓ Zero Shading"
         status_color = "#D97706" if is_shading_risk else "#15803D"
-        ax_main.text(right_offset + 0.05, (height + pitch) / 2, 
+        ax_main.text(right_offset + (field_width * 0.01), (height + pitch) / 2, 
                      f"Clear Space: {calculated_clear_space:.2f} m\n{status_label}", 
                      color=status_color, fontsize=10, ha='left', va='center', weight='bold')
 
     # Apply adaptive scaling borders to map axes to keep visuals crisp across inputs
-    pad_x = max(field_width * 0.20, 1.8)
-    pad_y = max(field_depth * 0.12, 1.2)
+    pad_x = max(field_width * 0.18, 2.0)
+    pad_y = max(field_depth * 0.12, 1.5)
     ax_main.set_xlim(-pad_x, field_width + pad_x)
     ax_main.set_ylim(-pad_y, field_depth + pad_y)
     ax_main.set_aspect('equal')
