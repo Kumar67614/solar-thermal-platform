@@ -9,3 +9,4 @@ scipy
 Pillow
 reportlab
 networkx
+fpdf2
