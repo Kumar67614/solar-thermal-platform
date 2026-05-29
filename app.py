@@ -83,7 +83,7 @@ def compile_proposal_pdf_document(industry, load, collectors, total_area, total_
         """
         return HTML(string=html_template).write_pdf()
     except Exception:
-        # 2. Universal Failsafe Backup Engine: FPDF2 (Replaces problematic characters to avoid crashing)
+        # 2. Universal Failsafe Backup Engine: FPDF2
         try:
             from fpdf import FPDF
         except ImportError:
@@ -101,7 +101,6 @@ def compile_proposal_pdf_document(industry, load, collectors, total_area, total_
                 self.set_font("Helvetica", "", 10)
                 self.set_text_color(56, 189, 248)
                 self.set_y(22)
-                # FIX: Replaced em-dash '—' with standard hyphen '-' to prevent unicode engine crash
                 self.cell(0, 0, f"Engineered Specification Report - {industry} Plant Application", ln=1, align="C")
                 self.set_y(45)
 
@@ -122,7 +121,7 @@ def compile_proposal_pdf_document(industry, load, collectors, total_area, total_
         pdf.line(15, pdf.get_y(), 195, pdf.get_y())
         pdf.ln(4)
         
-        # Table 1 Data (FIX: Plain ASCII characters used)
+        # Table 1 Data
         pdf.set_font("Helvetica", "", 10)
         pdf.set_text_color(30, 41, 59)
         tech_metrics = [
@@ -145,7 +144,7 @@ def compile_proposal_pdf_document(industry, load, collectors, total_area, total_
         pdf.line(15, pdf.get_y(), 195, pdf.get_y())
         pdf.ln(4)
         
-        # Table 2 Data (FIX: Replaced '₹' with 'INR')
+        # Table 2 Data
         pdf.set_font("Helvetica", "", 10)
         pdf.set_text_color(30, 41, 59)
         fin_metrics = [
@@ -158,7 +157,8 @@ def compile_proposal_pdf_document(industry, load, collectors, total_area, total_
             pdf.cell(100, 8, label, border="B")
             pdf.cell(80, 8, val, border="B", ln=1, align="R")
 
-        return pdf.output()
+        # FIX: Force clean translation from standard internal bytearrays to an immutable bytes object for Streamlit's marshal engine
+        return bytes(pdf.output())
 
 
 # =====================================================
