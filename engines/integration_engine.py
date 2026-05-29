@@ -1,111 +1,122 @@
-def get_system_diagram():
+def generate_integration_report(process_load_kwh, modules_count, field_area_m2, flow_rate_lph, main_pipe_dn):
     """
-    Returns a text-based pictorial diagram of the installation flow.
+    Generates a dynamic pictorial system blueprint diagram and customized 
+    integration instructions matching the customer's exact site metrics.
     """
-    return """
+    
+    # 1. Dynamically build the pictorial layout block based on customer footprint size
+    # We alter the visual size of the collector array block to represent system scale.
+    if modules_count >= 50:
+        array_visual = "│   [===] [===] [===] [===]   │ (Large Field Array)"
+        scale_label  = "LARGE INDUSTRIAL SYSTEM"
+    elif modules_count >= 40:
+        array_visual = "│      [===] [===] [===]      │ (Medium Field Array)"
+        scale_label  = "MEDIUM INDUSTRIAL SYSTEM"
+    else:
+        array_visual = "│         [===] [===]         │ (Small Field Array)"
+        scale_label  = "SMALL COMMERCIAL SYSTEM"
+
+    # 2. Construct the customized pictorial diagram string
+    diagram = f"""
     ========================================================================================
-                                INDUSTRIAL SOLAR THERMAL FLOW DIAGRAM
+    PICTORIAL INTEGRATION SCHEMATIC: {scale_label}
     ========================================================================================
     
-       [ SUNLIGHT ] 
+       [ SUNLIGHT ] ──> (Target Load: {process_load_kwh} kWh/Day)
             │
             ▼
-      ┌───────────┐         Hot Water          ┌──────────────┐         To Process Tank
-      │   SOLAR   │───────────────────────────>│     HEAT     │─────────────────────────> (Dairy/Factory)
-      │  PANELS   │                            │  EXCHANGER   │
-      └───────────┘                            └──────────────┘
-            ▲                                         ▲
-            │                                         │
-      ┌───────────┐                                   │ Cold Water
-      │ WATER PUMP│<──────────────────────────────────┘ Return
-      └───────────┘
-            ▲
-            │ (Fresh Feed / Makeup Water)
-     
+      ┌──────────────────────────────┐
+      │     SOLAR COLLECTOR FIELD    │
+      {array_visual}
+      │   Total Modules: {modules_count} Units     │ Size: {field_area_m2} m²
+      └──────────────────────────────┘
+            │                                         
+            │ Hot Water Outflow ({flow_rate_lph} LPH via DN {main_pipe_dn} Pipe)
+            ▼                                         
+      ┌──────────────────────────────┐                ┌──────────────────────────────┐
+      │   AUTOMATIC 3-WAY VALVES     │──────────────> │   CENTRAL HEAT EXCHANGER     │
+      │ (Air & Pressure Relief Safety)│                │ (Isolates Solar & Boiler Eco)│
+      └──────────────────────────────┘                └──────────────────────────────┘
+            ▲                                                         │
+            │                                                         │ Closed Loop
+            │ Pumped Cold Return Fluid                                │ Clean Return
+      ┌──────────────────────────────┐                                │
+      │  HYDRAULIC LOOP WATER PUMP   │ <──────────────────────────────┘
+      └──────────────────────────────┘
     ========================================================================================
     """
 
-def installation_steps():
-    """
-    Returns the visual diagram followed by the step-by-step 
-    on-site assembly instructions.
-    """
+    # 3. Generate tailored, clear on-site instructions that ingest the real metrics
     steps = [
         {
-            "step": "Site Inspection & Foundation Check",
-            "description": (
-                "Walk around the roof or ground area where the solar panels will go. "
-                "Make sure the ground can hold the weight of the metal frames and water-filled panels. "
-                "Check for any nearby trees or buildings that might block the sunlight during the day."
+            "phase": "Phase 1: Collector Field Foundation & Assembly",
+            "action": (
+                f"Assemble the metal support frames to host exactly {modules_count} Solar Thermal Units. "
+                f"Ensure the structural footprint safely spans across the designated {field_area_m2} m² area. "
+                "Secure all ground anchor bolts to handle crosswind load parameters securely."
             )
         },
         {
-            "step": "Assembling the Metal Support Frames",
-            "description": (
-                "Fix the metal stand legs firmly to the floor using strong anchor bolts. "
-                "Set the tilt angle of the stands exactly as shown in your layout map. "
-                "Double-check that all bolts are tight so the frames can withstand strong winds."
+            "phase": "Phase 2: Main Hydraulic Plumbing Network",
+            "action": (
+                f"Plumb the primary distribution headers using heavy-duty DN {main_pipe_dn} piping. "
+                f"This thickness ensures a balanced fluid velocity for the target loop delivery flow rate of {flow_rate_lph} LPH. "
+                "Wrap all external hot-water conduits with thick foam insulation shielding to stop heat loss."
             )
         },
         {
-            "step": "Mounting the Solar Panels",
-            "description": (
-                "Lift the solar panels carefully onto the metal stands. "
-                "Clamp them down securely to make sure they do not move or slide. "
-                "Leave a small gap between the panel rows so they do not shade one another."
+            "phase": "Phase 3: Thermal Loop Integration",
+            "action": (
+                f"Tie the system into the factory hot water line via the central heat exchanger. "
+                f"Verify that the system can reliably harvest up to {process_load_kwh} kWh of daily solar heat. "
+                "Position the safety pressure and automated 3-way air-release valves at the highest physical bends."
             )
         },
         {
-            "step": "Laying and Joining the Water Pipes",
-            "description": (
-                "Connect the water input and output pipes to the panel array. "
-                "Use standard rubber washers or glue to stop any water leaks. "
-                "Wrap all outside hot-water pipes with thick foam insulation to keep the water from losing its heat."
-            )
-        },
-        {
-            "step": "Connecting the Water Pump & Heat Exchanger",
-            "description": (
-                "Mount the main water pump and connect it to the electrical box. "
-                "Pipe the hot water coming from the solar panels into the heat exchanger unit. "
-                "Make sure the regular factory water pipes are connected properly to the other side of the exchanger."
-            )
-        },
-        {
-            "step": "Setting up the Automatic Safety Valves",
-            "description": (
-                "Install the 3-way automatic valves to control how the water flows. "
-                "Put in the air release valves at the highest points of the pipeline to stop air bubbles. "
-                "Attach the pressure release valves to safely vent out extra steam if the system gets too hot."
-            )
-        },
-        {
-            "step": "Wiring the Temperature Sensors & Controller",
-            "description": (
-                "Place the temperature probes inside the solar panels and the water tank. "
-                "Run the sensor wires back to the main control panel box. "
-                "Turn on the controller screen and test if it reads the hot and cold temperatures correctly."
-            )
-        },
-        {
-            "step": "Testing for Leaks and Starting Up",
-            "description": (
-                "Fill the entire system with water and run the pump for an hour. "
-                "Check every joint and valve closely to make sure there are zero water drips. "
-                "Once everything is dry and working, open the valves to let the hot solar water mix with your boiler tank."
+            "phase": "Phase 4: Sensor Controls Calibration & Startup",
+            "action": (
+                "Insert thermal monitoring probes inside the module headers and clean water tanks. "
+                "Boot up the control screen dashboard panel, verify active valve switching ranges, "
+                "and execute an initial 60-minute continuous water pressure test to eliminate plumbing leaks."
             )
         }
     ]
-    
+
     return {
-        "diagram": get_system_diagram(),
+        "diagram": diagram,
         "steps": steps
     }
 
-# Quick run test
+
+# ==========================================
+# SIMULATING DIFFERENT CUSTOMER APPLICATIONS
+# ==========================================
 if __name__ == "__main__":
-    data = installation_steps()
-    print(data["diagram"])
-    for index, s in enumerate(data["steps"], 1):
-        print(f"{index}. {s['step']}")
-        print(f"   {s['description']}\n")
+    print("\n--- SIMULATION 1: RUNNING CUSTOMER CASE A (FROM DASHBOARD DATA) ---")
+    # Simulating data matching the 42 Collector dashboard display
+    customer_a_report = generate_integration_report(
+        process_load_kwh=279.1,
+        modules_count=42,
+        field_area_m2=512.4,
+        flow_rate_lph=2100.0,
+        main_pipe_dn=25
+    )
+    
+    print(customer_a_report["diagram"])
+    for step in customer_a_report["steps"]:
+        print(f"[*] {step['phase']}\n    {step['action']}\n")
+
+
+    print("\n--- SIMULATION 2: RUNNING CUSTOMER CASE B (LARGE SCALED FIELD) ---")
+    # Simulating data matching the 52 Collector high-yield dashboard display
+    customer_b_report = generate_integration_report(
+        process_load_kwh=348.8,
+        modules_count=52,
+        field_area_m2=634.4,
+        flow_rate_lph=2600.0,
+        main_pipe_dn=25
+    )
+    
+    print(customer_b_report["diagram"])
+    for step in customer_b_report["steps"]:
+        print(f"[*] {step['phase']}\n    {step['action']}\n")
