@@ -28,15 +28,14 @@ from engines.financial_engine import (
 )
 
 # =====================================================
-# COMPREHENSIVE PDF GENERATOR WITH FAILSAFE ENGINE
+# PREMIUM HIGH-RESOLUTION PDF COMPILER ELEMENT
 # =====================================================
-def compile_proposal_pdf_document(industry, load, collectors, total_area, total_flow, cost, savings, payback, npv_val, collector_type, rows, cols):
+def compile_proposal_pdf_document(industry, load, collectors, total_area, total_flow, cost, savings, payback, npv_val, collector_type, rows, cols, tin, tout, irradiance, fuel_cost, df_analytics):
     """
     Attempts high-fidelity HTML-to-PDF compilation via WeasyPrint.
-    If WeasyPrint/Pango dependencies are missing, handles it gracefully by
-    compiling a clean, valid PDF binary stream via fpdf2 using core-safe characters.
+    If dependencies are missing, uses an advanced multi-tab data fpdf2 
+    failover to guarantee a perfectly formed, openable PDF document.
     """
-    # 1. Primary Engine Attempt: Weasyprint
     try:
         from weasyprint import HTML
         html_template = f"""
@@ -50,40 +49,77 @@ def compile_proposal_pdf_document(industry, load, collectors, total_area, total_
                 .header {{ background-color: #0f172a; color: #ffffff; padding: 25px; border-radius: 6px; margin-bottom: 25px; }}
                 .header h1 {{ margin: 0; font-size: 22px; font-weight: 700; }}
                 .header p {{ margin: 5px 0 0 0; color: #38bdf8; font-size: 13px; }}
-                h2 {{ color: #0284c7; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; margin-top: 25px; }}
+                h2 {{ color: #0284c7; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; margin-top: 25px; page-break-after: avoid; }}
                 table {{ width: 100%; border-collapse: collapse; margin-top: 12px; margin-bottom: 20px; }}
-                th {{ background-color: #f8fafc; color: #475569; text-align: left; padding: 8px 10px; font-size: 12px; border-bottom: 2px solid #cbd5e1; }}
-                td {{ padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 12px; }}
+                th {{ background-color: #f8fafc; color: #475569; text-align: left; padding: 8px 10px; font-size: 11px; border-bottom: 2px solid #cbd5e1; }}
+                td {{ padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 11px; }}
+                .section-desc {{ color: #475569; font-size: 11px; margin-bottom: 10px; }}
             </style>
         </head>
         <body>
             <div class="header">
                 <h1>Industrial Solar Thermal Project Proposal</h1>
-                <p>Comprehensive Engineering Assessment & Lifecycle Return Ledger</p>
+                <p>Complete Engineering Sizing, Seasonal Analytics & Financial Returns Report</p>
             </div>
-            <h2>1. Technical Design & Hydraulic Sizing Framework</h2>
+            
+            <h2>1. Technical Sizing & Design Parameters</h2>
+            <p class="section-desc">Dynamic load analysis based on input configurations and process constraints.</p>
             <table>
-                <tr><th>Design Parameter</th><th>Calculated Specification Target</th></tr>
-                <tr><td>Utility Process Thermal Load</td><td>{load:.1f} kWh / Day</td></tr>
-                <tr><td>Collector Technology Matrix</td><td>{collector_type} Array</td></tr>
-                <tr><td>Modules Count</td><td>{collectors} Units ({rows} Rows × {cols} Columns)</td></tr>
-                <tr><td>Total Field Footprint Gross Area</td><td>{total_area:.1f} m²</td></tr>
-                <tr><td>Design Loop Flow Rate</td><td>{total_flow:.1f} LPH</td></tr>
+                <thead><tr><th>Technical Parameter Benchmark</th><th>Calculated Specification Target</th></tr></thead>
+                <tbody>
+                    <tr><td>Target Utility Process Load</td><td><strong>{load:.1f} kWh / Day</strong></td></tr>
+                    <tr><td>Collector Technology Choice</td><td><strong>{collector_type}</strong></td></tr>
+                    <tr><td>Required Array Modules Sizing</td><td><strong>{collectors} Units ({rows} Rows x {cols} Columns)</strong></td></tr>
+                    <tr><td>Total Gross Field Footprint Area</td><td><strong>{total_area:.1f} m²</strong></td></tr>
+                    <tr><td>Design Hydraulic Loop Flow</td><td><strong>{total_flow:.1f} LPH (Balanced Parallel)</strong></td></tr>
+                </tbody>
             </table>
-            <h2>2. Commercial Investment Ledger</h2>
+
+            <h2>2. Comprehensive Commercial Returns Summary</h2>
+            <p class="section-desc">Capital budgeting model projections factoring in step-down volume discounting matrix targets.</p>
             <table>
-                <tr><th>Financial Milestone Metric</th><th>Projected Lifecycle Return Yield</th></tr>
-                <tr><td>Estimated Initial Capital Outlay (CapEx)</td><td>₹ {cost:,.0f}</td></tr>
-                <tr><td>Year 1 Fuel Displaced Savings</td><td>₹ {savings:,.0f}</td></tr>
-                <tr><td>Dynamic Payback Period Window</td><td>{payback:.2f} Years</td></tr>
-                <tr><td>Project Net Present Value (20-Yr NPV)</td><td>₹ {npv_val:,.0f}</td></tr>
+                <thead><tr><th>Financial Milestone Metric</th><th>Projected Lifecycle Return Yield</th></tr></thead>
+                <tbody>
+                    <tr><td>Estimated Initial Capital Outlay (CapEx)</td><td><strong>₹ {cost:,.0f}</strong></td></tr>
+                    <tr><td>Year 1 Displaced Boiler Fuel Savings</td><td><strong>₹ {savings:,.0f}</strong></td></tr>
+                    <tr><td>Dynamic Break-Even Payback Period</td><td><strong>{payback:.2f} Years</strong></td></tr>
+                    <tr><td>Project Net Present Value (20-Yr WACC NPV)</td><td><strong>₹ {npv_val:,.0f}</strong></td></tr>
+                </tbody>
+            </table>
+
+            <h2>3. Seasonal Yield Verification Matrix</h2>
+            <p class="section-desc">Month-by-month localized environmental simulation logs tracking utility contribution indexes.</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Operational Month</th>
+                        <th>Efficiency (%)</th>
+                        <th>Thermal Yield (kWh/day)</th>
+                        <th>Solar Fraction (%)</th>
+                        <th>Fuel Saved (L/month)</th>
+                    </tr>
+                </thead>
+                <tbody>
+        """
+        for _, r in df_analytics.iterrows():
+            html_template += f"""
+                    <tr>
+                        <td>{r['Month']}</td>
+                        <td>{r['Efficiency (%)']:.1f}%</td>
+                        <td>{r['Collector Yield (kWh/day)']:.1f}</td>
+                        <td>{r['Solar Fraction (%)']:.1f}%</td>
+                        <td>{r['Fuel Saved (Liters/month)']:.0f} L</td>
+                    </tr>
+            """
+        html_template += """
+                </tbody>
             </table>
         </body>
         </html>
         """
         return HTML(string=html_template).write_pdf()
     except Exception:
-        # 2. Universal Failsafe Backup Engine: FPDF2
+        # Failsafe Engine: FPDF2 Extended Multi-Vector Report Compiler
         try:
             from fpdf import FPDF
         except ImportError:
@@ -92,77 +128,126 @@ def compile_proposal_pdf_document(industry, load, collectors, total_area, total_
 
         class FPDFProposal(FPDF):
             def header(self):
-                self.set_fill_color(15, 23, 42) # Dark Indigo Banner
-                self.rect(0, 0, 210, 40, 'F')
-                self.set_font("Helvetica", "B", 18)
+                self.set_fill_color(15, 23, 42) 
+                self.rect(0, 0, 210, 38, 'F')
+                self.set_font("Helvetica", "B", 16)
                 self.set_text_color(255, 255, 255)
-                self.set_y(12)
+                self.set_y(10)
                 self.cell(0, 0, "Industrial Solar Thermal Project Proposal", ln=1, align="C")
                 self.set_font("Helvetica", "", 10)
                 self.set_text_color(56, 189, 248)
-                self.set_y(22)
-                self.cell(0, 0, f"Engineered Specification Report - {industry} Plant Application", ln=1, align="C")
-                self.set_y(45)
+                self.set_y(20)
+                self.cell(0, 0, f"Comprehensive Engineering Sizing & Analytics Report - {industry} Plant", ln=1, align="C")
+                self.set_y(42)
 
             def footer(self):
                 self.set_y(-15)
                 self.set_font("Helvetica", "I", 8)
                 self.set_text_color(100, 116, 139)
-                self.cell(0, 10, f"Page {self.page_no()}", align="R")
+                self.cell(0, 10, f"Technical Sizing Assessment Ledger  |  Page {self.page_no()}", align="R")
 
         pdf = FPDFProposal()
         pdf.add_page()
         pdf.set_margins(15, 20, 15)
         
-        # Section 1 Header
+        # --- SECTION 1: DESIGN PARAMETERS ---
         pdf.set_text_color(2, 132, 199)
-        pdf.set_font("Helvetica", "B", 14)
-        pdf.cell(0, 10, "1. Technical Design & Hydraulic Sizing Framework", ln=1)
+        pdf.set_font("Helvetica", "B", 13)
+        pdf.cell(0, 8, "1. Technical Design & Sizing Parameters", ln=1)
         pdf.line(15, pdf.get_y(), 195, pdf.get_y())
-        pdf.ln(4)
+        pdf.ln(3)
         
-        # Table 1 Data
-        pdf.set_font("Helvetica", "", 10)
+        pdf.set_font("Helvetica", "", 9)
         pdf.set_text_color(30, 41, 59)
         tech_metrics = [
-            ("Utility Process Thermal Load", f"{load:.1f} kWh / Day"),
-            ("Selected Collector Technology", f"{collector_type} Array"),
-            ("Required Collector Modules Count", f"{collectors} Units ({rows} R x {cols} C)"),
-            ("Total Field Footprint Gross Area", f"{total_area:.1f} m2"),
-            ("Balanced Loop Flow Rate (Parallel)", f"{total_flow:.1f} LPH")
+            ("Utility Process Thermal Load Demand Baseline", f"{load:.1f} kWh / Day"),
+            ("Process Water Core Requirement Boundaries", f"{tin} C Inlet Temp up to {tout} C Target Output"),
+            ("Selected Solar Collector Matrix Line", f"{collector_type} Array Framework"),
+            ("Required Modules Count Calculation", f"{collectors} Units Sized ({rows} Rows x {cols} Columns)"),
+            ("Total Collector Field Footprint Gross Area", f"{total_area:.1f} m2 Layout footprint"),
+            ("Balanced Primary Loop Flow Capacity Design", f"{total_flow:.1f} LPH (Parallel Flow Management)")
         ]
         for label, val in tech_metrics:
-            pdf.cell(100, 8, label, border="B")
-            pdf.cell(80, 8, val, border="B", ln=1, align="R")
+            pdf.cell(110, 7, label, border="B")
+            pdf.cell(70, 7, val, border="B", ln=1, align="R")
             
-        pdf.ln(10)
+        pdf.ln(8)
         
-        # Section 2 Header
+        # --- SECTION 2: COMMERCIAL LIFE CYCLE ---
         pdf.set_text_color(2, 132, 199)
-        pdf.set_font("Helvetica", "B", 14)
-        pdf.cell(0, 10, "2. Commercial Investment Ledger", ln=1)
+        pdf.set_font("Helvetica", "B", 13)
+        pdf.cell(0, 8, "2. Commercial Investment Ledger & Returns Summary", ln=1)
         pdf.line(15, pdf.get_y(), 195, pdf.get_y())
-        pdf.ln(4)
+        pdf.ln(3)
         
-        # Table 2 Data
-        pdf.set_font("Helvetica", "", 10)
+        pdf.set_font("Helvetica", "", 9)
         pdf.set_text_color(30, 41, 59)
         fin_metrics = [
-            ("Estimated Initial Capital Outlay (CapEx)", f"INR {cost:,.0f}"),
-            ("Year 1 Displaced Fuel Savings", f"INR {savings:,.0f}"),
-            ("Dynamic Lifecycle Payback Period Window", f"{payback:.2f} Years"),
-            ("Project Net Present Value (20-Yr NPV)", f"INR {npv_val:,.0f}")
+            ("Estimated Capital Sizing Allocation (CapEx)", f"INR {cost:,.0f}"),
+            ("Year 1 Displaced Boiler Fuel Savings", f"INR {savings:,.0f}"),
+            ("Dynamic Lifecycle Payback Period Window", f"{payback:.2f} Years Break-even"),
+            ("Project Net Present Value Sizing (20-Yr WACC)", f"INR {npv_val:,.0f}")
         ]
         for label, val in fin_metrics:
-            pdf.cell(100, 8, label, border="B")
-            pdf.cell(80, 8, val, border="B", ln=1, align="R")
+            pdf.cell(110, 7, label, border="B")
+            pdf.cell(70, 7, val, border="B", ln=1, align="R")
 
-        # FIX: Force clean translation from standard internal bytearrays to an immutable bytes object for Streamlit's marshal engine
+        pdf.ln(8)
+
+        # --- SECTION 3: VISUAL MATRIX Blueprints ---
+        pdf.set_text_color(2, 132, 199)
+        pdf.set_font("Helvetica", "B", 13)
+        pdf.cell(0, 8, "3. Solar Array Layout Field Footprint Scheme", ln=1)
+        pdf.line(15, pdf.get_y(), 195, pdf.get_y())
+        pdf.ln(4)
+
+        pdf.set_font("Courier", "B", 9)
+        pdf.set_text_color(71, 85, 105)
+        # Visual map generation
+        for r_idx in range(min(5, rows)):
+            row_str = f"Row {r_idx+1:02d}: " + " ".join(["[=]" for _ in range(min(12, cols))])
+            if cols > 12: row_str += " ... (+)"
+            pdf.cell(0, 5, row_str, ln=1)
+        if rows > 5:
+            pdf.cell(0, 5, f"... (+ {rows - 5} Rows Parallel Array Structural Balance)", ln=1)
+        
+        pdf.ln(6)
+
+        # --- SECTION 4: SEASONAL MATRIX TABLE ---
+        pdf.add_page()
+        pdf.set_text_color(2, 132, 199)
+        pdf.set_font("Helvetica", "B", 13)
+        pdf.cell(0, 8, "4. Month-by-Month Environmental Yield Verification Matrix", ln=1)
+        pdf.line(15, pdf.get_y(), 195, pdf.get_y())
+        pdf.ln(4)
+
+        # Table Header
+        pdf.set_font("Helvetica", "B", 9)
+        pdf.set_fill_color(248, 250, 252)
+        pdf.set_text_color(71, 85, 105)
+        pdf.cell(35, 7, "Month", border=1, fill=True)
+        pdf.cell(35, 7, "Efficiency", border=1, fill=True, align="C")
+        pdf.cell(40, 7, "Yield (kWh/day)", border=1, fill=True, align="C")
+        pdf.cell(35, 7, "Solar Fraction", border=1, fill=True, align="C")
+        pdf.cell(35, 7, "Fuel Saved", border=1, fill=True, align="C")
+        pdf.ln()
+
+        # Table Data Loops
+        pdf.set_font("Helvetica", "", 9)
+        pdf.set_text_color(30, 41, 59)
+        for _, r in df_analytics.iterrows():
+            pdf.cell(35, 7, str(r['Month']), border=1)
+            pdf.cell(35, 7, f"{r['Efficiency (%)']:.1f}%", border=1, align="C")
+            pdf.cell(40, 7, f"{r['Collector Yield (kWh/day)']:.1f}", border=1, align="C")
+            pdf.cell(35, 7, f"{r['Solar Fraction (%)']:.1f}%", border=1, align="C")
+            pdf.cell(35, 7, f"{r['Fuel Saved (Liters/month)']:.0f} L", border=1, align="C")
+            pdf.ln()
+
         return bytes(pdf.output())
 
 
 # =====================================================
-# PAGE CONFIG
+# SYSTEM INITIALIZATION & PAGE CONFIG
 # =====================================================
 st.set_page_config(
     page_title="Industrial Solar Thermal Platform",
@@ -270,7 +355,7 @@ fuel_cost = st.sidebar.number_input(
 )
 
 # =====================================================
-# AUTOMATED CORE CALCULATIONS BASELINE
+# AUTOMATED CALCULATION ENGINES RUNTIME
 # =====================================================
 load = thermal_load(daily_water, tin, tout)
 tm = (tin + tout) / 2.0
@@ -307,18 +392,19 @@ pb_dash = calculate_dynamic_payback(initial_investment=cost_dash, year_one_savin
 n_dash = calculate_comprehensive_npv(initial_investment=cost_dash, year_one_savings=savings_dash, lifecycle_years=20, discount_rate=0.08, fuel_escalation=0.06, opex_rate=0.015)
 
 # =====================================================
-# SAFE DOWNLOAD TRIGGER RUNTIME
+# COMPREHENSIVE PDF DATA BUFFER COMPILATION
 # =====================================================
 pdf_data_buffer = compile_proposal_pdf_document(
     industry=industry, load=load, collectors=collectors, total_area=total_area, 
     total_flow=total_flow, cost=cost_dash, savings=savings_dash, payback=pb_dash, 
-    npv_val=n_dash, collector_type=collector_type, rows=calculated_rows, cols=calculated_cols
+    npv_val=n_dash, collector_type=collector_type, rows=calculated_rows, cols=calculated_cols,
+    tin=tin, tout=tout, irradiance=irradiance, fuel_cost=fuel_cost, df_analytics=df_analytics
 )
 
 st.sidebar.markdown("---")
 if pdf_data_buffer is not None:
     st.sidebar.download_button(
-        label="📥 Download Proposal PDF",
+        label="📥 Download Proposal PDF Report",
         data=pdf_data_buffer,
         file_name=f"Solar_Thermal_Proposal_{industry}.pdf",
         mime="application/pdf",
@@ -328,7 +414,7 @@ else:
     st.sidebar.error("Error creating PDF document.")
 
 # =====================================================
-# SYSTEM INTERFACE TABS
+# SYSTEM APPLICATION INTERFACE NAVIGATION TABS
 # =====================================================
 tabs = st.tabs([
     "Dashboard",
@@ -342,7 +428,7 @@ tabs = st.tabs([
 ])
 
 # =====================================================
-# TAB 0: PILOT DASHBOARD VIEW
+# TAB 0: EXECUTIVE ANALYTICAL DASHBOARD
 # =====================================================
 with tabs[0]:
     st.title("Industrial Solar Thermal Proposal Platform")
@@ -397,6 +483,7 @@ with tabs[0]:
 
     g_row2_c1, g_row2_c2 = st.columns(2)
     with g_row2_c1:
+        #
         fig_perf = make_subplots(specs=[[{"secondary_y": True}]])
         fig_perf.add_trace(go.Bar(x=df_analytics["Month"], y=df_analytics["Collector Yield (kWh/day)"], name="Thermal Yield (kWh)", marker_color="#0284c7"), secondary_y=False)
         fig_perf.add_trace(go.Scatter(x=df_analytics["Month"], y=df_analytics["Solar Fraction (%)"], name="Solar Fraction (%)", mode="lines+markers", line=dict(color="#16a34a", width=2)), secondary_y=True)
@@ -406,6 +493,7 @@ with tabs[0]:
         st.plotly_chart(fig_perf, use_container_width=True, key='graph_seasonal_profile')
 
     with g_row2_c2:
+        #
         fig_save = make_subplots(specs=[[{"secondary_y": True}]])
         fig_save.add_trace(go.Bar(x=df_analytics["Month"], y=df_analytics["Fuel Saved (Liters/month)"], name="Fuel Saved (L)", marker_color="#ea580c"), secondary_y=False)
         fig_save.add_trace(go.Scatter(x=df_analytics["Month"], y=df_analytics["CO2 Mitigated (kg/month)"] / 1000.0, name="CO2 Abated (Tons)", mode="lines+markers", line=dict(color="#047857", width=2, dash="dash")), secondary_y=True)
@@ -423,10 +511,10 @@ with tabs[0]:
     st.plotly_chart(fig_dash_payback, use_container_width=True, key='graph_payback_profile')
 
 # =====================================================
-# REMAINING SYSTEM TABS
+# RETAIN STANDARD BACKEND MODULE TABS
 # =====================================================
 with tabs[1]:
-    st.header("Advanced Seasonal Matrix")
+    st.header("Advanced Seasonal Matrix Summary")
     st.dataframe(df_analytics, hide_index=True, use_container_width=True)
 
 with tabs[2]:
