@@ -507,6 +507,18 @@ fuel_cost = st.sidebar.number_input(
 # =====================================================
 # AUTOMATED CALCULATION ENGINES RUNTIME
 # =====================================================
+# This must come BEFORE line 510
+def thermal_load(daily_water, tin, tout):
+    # Your math formulas for calculating kWh go here...
+    density = 1000 # kg/m3
+    specific_heat = 4.186 # kJ/kg°C
+    # ...
+    return calculated_kwh
+
+# ... (other code) ...
+
+# Line 510 will now work safely down here
+load = thermal_load(daily_water, tin, tout)
 load = thermal_load(daily_water, tin, tout)
 tm = (tin + tout) / 2.0
 
