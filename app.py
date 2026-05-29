@@ -34,7 +34,7 @@ def compile_proposal_pdf_document(industry, load, collectors, total_area, total_
     """
     Attempts high-fidelity HTML-to-PDF compilation via WeasyPrint.
     If WeasyPrint/Pango dependencies are missing, handles it gracefully by
-    compiling a clean, valid PDF binary stream via fpdf2 to guarantee readability.
+    compiling a clean, valid PDF binary stream via fpdf2 using core-safe characters.
     """
     # 1. Primary Engine Attempt: Weasyprint
     try:
@@ -83,7 +83,7 @@ def compile_proposal_pdf_document(industry, load, collectors, total_area, total_
         """
         return HTML(string=html_template).write_pdf()
     except Exception:
-        # 2. Universal Failsafe Backup Engine: FPDF2 (Ensures valid openable binary)
+        # 2. Universal Failsafe Backup Engine: FPDF2 (Replaces problematic characters to avoid crashing)
         try:
             from fpdf import FPDF
         except ImportError:
@@ -101,7 +101,8 @@ def compile_proposal_pdf_document(industry, load, collectors, total_area, total_
                 self.set_font("Helvetica", "", 10)
                 self.set_text_color(56, 189, 248)
                 self.set_y(22)
-                self.cell(0, 0, f"Engineered Specification Report — {industry} Plant Application", ln=1, align="C")
+                # FIX: Replaced em-dash '—' with standard hyphen '-' to prevent unicode engine crash
+                self.cell(0, 0, f"Engineered Specification Report - {industry} Plant Application", ln=1, align="C")
                 self.set_y(45)
 
             def footer(self):
@@ -121,7 +122,7 @@ def compile_proposal_pdf_document(industry, load, collectors, total_area, total_
         pdf.line(15, pdf.get_y(), 195, pdf.get_y())
         pdf.ln(4)
         
-        # Table 1 Data
+        # Table 1 Data (FIX: Plain ASCII characters used)
         pdf.set_font("Helvetica", "", 10)
         pdf.set_text_color(30, 41, 59)
         tech_metrics = [
@@ -144,7 +145,7 @@ def compile_proposal_pdf_document(industry, load, collectors, total_area, total_
         pdf.line(15, pdf.get_y(), 195, pdf.get_y())
         pdf.ln(4)
         
-        # Table 2 Data
+        # Table 2 Data (FIX: Replaced '₹' with 'INR')
         pdf.set_font("Helvetica", "", 10)
         pdf.set_text_color(30, 41, 59)
         fin_metrics = [
@@ -283,7 +284,7 @@ total_area = collectors * gross_area
 calculated_rows = max(1, int(math.ceil(math.sqrt(collectors) / 2)))
 calculated_cols = max(1, int(math.ceil(collectors / calculated_rows)))
 
-# Balanced Loop Flow Equation
+# Balanced Dynamic Flow Rate Calculations
 total_flow = calculated_rows * flow_per_collector
 velocity = pipe_velocity(total_flow)
 re = reynolds_number(velocity)
@@ -315,7 +316,7 @@ pdf_data_buffer = compile_proposal_pdf_document(
 )
 
 st.sidebar.markdown("---")
-if pdf_data_buffer:
+if pdf_data_buffer is not None:
     st.sidebar.download_button(
         label="📥 Download Proposal PDF",
         data=pdf_data_buffer,
