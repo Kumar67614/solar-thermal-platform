@@ -83,7 +83,7 @@ def compile_proposal_pdf_document(industry, load, collectors, total_area, total_
                 <tr><td>Selected Collector Technology Matrix</td><td><strong>{collector_type} Array</strong></td></tr>
                 <tr><td>Required Solar Collector Modules Count</td><td><strong>{collectors} Units ({rows} Rows × {cols} Columns)</strong></td></tr>
                 <tr><td>Total Field Footprint Gross Area</td><td><strong>{total_area:.1f} m²</strong></td></tr>
-                <tr><td>Balanced Design Loop Flow Rate (Parallel)</td><td><strong>{total_flow:.1f} LPH (Balanced Array Optimization)</strong></td></tr>
+                <tr><td>Balanced Design Loop Flow Rate (Parallel)</td><td><strong>{total_flow:.1f} LPH</strong></td></tr>
             </tbody>
         </table>
 
@@ -105,14 +105,9 @@ def compile_proposal_pdf_document(industry, load, collectors, total_area, total_
         <div class="list-item"><strong>• Module Fixed Tilt Assembly:</strong> Clamp panels coplanarly to distribute wind and structural loads evenly.</div>
         <div class="list-item"><strong>• Pressure Integrity Audit:</strong> Perform an on-site hydrostatic test by holding the water loop at 1.5x design pressure for 24 hours to confirm leak-free plumbing.</div>
         <div class="list-item"><strong>• Loss Shield Insulation:</strong> Wrap manifolds in mineral wool jackets under aluminum covers to preserve utility heat.</div>
-
-        <div class="highlight-box">
-            <p>✔ Sizing & Accuracy Verification: This configuration applies volume discounts via step-down pricing brackets to maintain realistic capital budgeting goals and uses parallel piping layout equations to prevent high pressure drops and excessive flow rates.</p>
-        </div>
     </body>
     </html>
     """
-    
     try:
         from weasyprint import HTML
         return HTML(string=html_template).write_pdf()
@@ -234,32 +229,27 @@ fuel_cost = st.sidebar.number_input(
 load = thermal_load(daily_water, tin, tout)
 tm = (tin + tout) / 2.0
 
-# Calculate specific operational point efficiency via the HWB formula
 eta_operational = collector_efficiency(eta0, a1, a2, tm, ambient, irradiance)
-
 instantaneous_output_w = (aperture_area * eta_operational * irradiance)
 daily_output = (instantaneous_output_w * peak_hours) / 1000.0
 collectors = collectors_required(load, daily_output)
 total_area = collectors * gross_area
 
-# Calculate structural layout parameters early to correct the primary flow loop calculations
 calculated_rows = max(1, int(math.ceil(math.sqrt(collectors) / 2)))
 calculated_cols = max(1, int(math.ceil(collectors / calculated_rows)))
 
-# FIX: Balances total loop flow based on parallel rows configuration to prevent flooding LPH targets
+# Fixed hydraulic flow based on parallel layout calculation
 total_flow = calculated_rows * flow_per_collector
 velocity = pipe_velocity(total_flow)
 re = reynolds_number(velocity)
 head = pump_head(total_flow)
 
-# Pre-compute shared backend analytics arrays to ensure sync across all tabs
 daily_plant_load, monthly_analytics_list = generate_proposal_analytics(
     lpd=daily_water, tin=tin, tout=tout, latitude=latitude,
     eta0=eta0, a1=a1, a2=a2, aperture_area=aperture_area
 )
 df_analytics = pd.DataFrame(monthly_analytics_list)
 
-# Post-process intermediate financial parameters before tab division
 cost_dash = calculate_market_project_cost(total_area=total_area, collector_type=collector_type)
 if not df_analytics.empty:
     annual_energy_yield_sum_kwh = float(df_analytics["Collector Yield (kWh/day)"].sum() * 30.4)
@@ -270,9 +260,7 @@ savings_dash = calculate_real_annual_savings(annual_energy_yield_kwh=annual_ener
 pb_dash = calculate_dynamic_payback(initial_investment=cost_dash, year_one_savings=savings_dash, fuel_escalation=0.06, opex_rate=0.015)
 n_dash = calculate_comprehensive_npv(initial_investment=cost_dash, year_one_savings=savings_dash, lifecycle_years=20, discount_rate=0.08, fuel_escalation=0.06, opex_rate=0.015)
 
-# =====================================================
-# UPGRADED DYNAMIC NATIVE PDF DOWNLOAD BUTTON
-# =====================================================
+# PDF Generation Stream
 pdf_data_buffer = compile_proposal_pdf_document(
     industry=industry, load=load, collectors=collectors, total_area=total_area, 
     total_flow=total_flow, cost=cost_dash, savings=savings_dash, payback=pb_dash, 
@@ -288,7 +276,7 @@ st.sidebar.download_button(
 )
 
 # =====================================================
-# SYSTEM APPLICATION INTERFACE NAVIGATION TABS
+# SYSTEM INTERFACE TABS
 # =====================================================
 tabs = st.tabs([
     "Dashboard",
@@ -306,21 +294,19 @@ tabs = st.tabs([
 # =====================================================
 with tabs[0]:
     st.title("Industrial Solar Thermal Proposal Platform")
-    st.markdown("Welcome to the executive assessment cockpit. This dashboard provides real-time system sizing, financial modeling, and performance predictions derived from your input parameters.")
     st.markdown("---")
 
-    # Row 1: Engineering & Thermal Sizing KPIs
+    # Row 1: Sizing Metrics
     st.subheader("☀️ Engineered Thermal System Sizing")
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Calculated Process Load", f"{load:.1f} kWh / Day")
     c2.metric("Required Modules Count", f"{collectors} Units")
     c3.metric("Total Field Gross Footprint", f"{total_area:.1f} m²")
-    c4.metric("Design Hydraulic Loop Flow", f"{total_flow:.1f} LPH (Balanced Parallel Loop)")
+    c4.metric("Design Hydraulic Loop Flow", f"{total_flow:.1f} LPH (Parallel Configuration)")
 
-    # Row 2: Financial Payback Sizing KPIs with corrected rates
+    # Row 2: Financial Metrics
     st.subheader("💰 Investment Returns Summary")
     f1, f2, f3, f4 = st.columns(4)
-    
     f1.metric("Estimated Project Cost (CapEx)", f"₹ {cost_dash:,.0f}")
     f2.metric("Year 1 Fuel Displaced Savings", f"₹ {savings_dash:,.0f}")
     f3.metric("Dynamic Payback Period", f"{pb_dash:.2f} Years")
@@ -328,211 +314,115 @@ with tabs[0]:
 
     st.markdown("---")
 
-    # Row 3: HWB Efficiency Plot & Payback Curve
-    st.subheader("📊 Performance Analytics & Investment Projections")
-    dash_graph_col1, dash_graph_col2 = st.columns(2)
-
-    with dash_graph_col1:
+    # =====================================================
+    # 5-VECTOR GRAPHICAL ANALYSIS SECTION
+    # =====================================================
+    st.subheader("📊 Dynamic Graphical Analysis Suite (Updates with Inputs)")
+    
+    # ROW 1 OF GRAPHS
+    g_row1_c1, g_row1_c2 = st.columns(2)
+    
+    with g_row1_c1:
+        # GRAPH 1: HWB Collector Efficiency Profile
         param_x_range = np.linspace(0.0, 0.12, 100)
         efficiency_curve = eta0 - (a1 * param_x_range) - (a2 * (param_x_range ** 2) * irradiance / 1000.0)
         efficiency_curve = np.clip(efficiency_curve, 0, 1) * 100.0
-        
         current_x_point = (tm - ambient) / irradiance
         current_y_point = eta_operational * 100.0
 
         fig_hwb = go.Figure()
-        fig_hwb.add_trace(go.Scatter(
-            x=param_x_range, y=efficiency_curve,
-            mode='lines', name='HWB Characteristic Curve',
-            line=dict(color='#0284c7', width=3)
-        ))
-        fig_hwb.add_trace(go.Scatter(
-            x=[current_x_point], y=[current_y_point],
-            mode='markers', name='Active Operating Point',
-            marker=dict(color='#ea580c', size=12, symbol='diamond', line=dict(color='#ffffff', width=2))
-        ))
-        
-        fig_hwb.update_layout(
-            title=f"<b>Collector Efficiency Profile (HWB Equation)</b><br>Current Efficiency: {current_y_point:.1f}%",
-            xaxis_title="Thermal Characterization Parameter (Tm - Ta) / G",
-            yaxis_title="Collector Efficiency (%)",
-            plot_bgcolor="#ffffff", height=380, margin=dict(l=20, r=20, t=60, b=20),
-            legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center")
-        )
-        fig_hwb.update_yaxes(range=[0, 105], gridcolor="#f1f5f9")
-        fig_hwb.update_xaxes(gridcolor="#f1f5f9")
-        st.plotly_chart(fig_hwb, use_container_width=True, key='dashboard_hwb_curve')
+        fig_hwb.add_trace(go.Scatter(x=param_x_range, y=efficiency_curve, mode='lines', name='HWB Curve', line=dict(color='#0284c7', width=3)))
+        fig_hwb.add_trace(go.Scatter(x=[current_x_point], y=[current_y_point], mode='markers', name='Operating Point', marker=dict(color='#ea580c', size=12, symbol='diamond')))
+        fig_hwb.update_layout(title="<b>1. Collector Efficiency Curve (HWB Model)</b>", xaxis_title="(Tm - Ta) / G", yaxis_title="Efficiency (%)", plot_bgcolor="#ffffff", height=350, margin=dict(l=10, r=10, t=40, b=10))
+        st.plotly_chart(fig_hwb, use_container_width=True, key='graph_hwb_profile')
 
-    with dash_graph_col2:
-        df_timeline_dash = generate_financial_timeline_dataframe(
-            initial_investment=cost_dash, year_one_savings=savings_dash,
-            lifecycle_years=15, discount_rate=0.08, fuel_escalation=0.06, opex_rate=0.015
-        )
+    with g_row1_c2:
+        # GRAPH 2: Volumetric Fluid Input vs Thermal Load Requirement
+        water_range_lpd = np.linspace(max(1000, daily_water - 4000), daily_water + 4000, 50)
+        calculated_kwh_range = (water_range_lpd * 4.186 * (tout - tin)) / 3600.0
         
-        fig_dash_payback = go.Figure()
-        fig_dash_payback.add_shape(type="line", x0=0, y0=0, x1=15, y1=0, line=dict(color="#cbd5e1", width=2, dash="dash"))
-        fig_dash_payback.add_trace(go.Scatter(
-            x=df_timeline_dash["Year"], y=df_timeline_dash["Cumulative Cash Position (₹)"],
-            mode="lines+markers", name="Cumulative Cash Balance",
-            line=dict(color="#16a34a", width=4, shape="spline"), marker=dict(size=8, color="#15803d")
-        ))
-        
-        fig_dash_payback.update_layout(
-            title="<b>Projected Return on Investment (Payback Horizon Curve)</b><br>Breakeven Point Tracker",
-            xaxis_title="Years in Operation", yaxis_title="Net Cumulative Position (₹)",
-            plot_bgcolor="#ffffff", height=380, margin=dict(l=20, r=20, t=60, b=20),
-            legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center")
-        )
-        fig_dash_payback.update_yaxes(gridcolor="#f1f5f9")
-        fig_dash_payback.update_xaxes(tickmode="linear", dtick=2, gridcolor="#f1f5f9")
-        st.plotly_chart(fig_dash_payback, use_container_width=True, key='dashboard_payback_curve')
+        fig_vol = go.Figure()
+        fig_vol.add_trace(go.Scatter(x=water_range_lpd, y=calculated_kwh_range, mode='lines', name='Thermal Load Scale', line=dict(color='#6366f1', width=3)))
+        fig_vol.add_trace(go.Scatter(x=[daily_water], y=[load], mode='markers', name='Your Setup Target', marker=dict(color='#ec4899', size=12)))
+        fig_vol.update_layout(title="<b>2. Fluid Volume Input vs Thermal Load Requirement</b>", xaxis_title="Daily Water Capacity (LPD)", yaxis_title="Energy Load (kWh/Day)", plot_bgcolor="#ffffff", height=350, margin=dict(l=10, r=10, t=40, b=10))
+        st.plotly_chart(fig_vol, use_container_width=True, key='graph_volumetric_load')
+
+    # ROW 2 OF GRAPHS
+    g_row2_c1, g_row2_c2 = st.columns(2)
+    
+    with g_row2_c1:
+        # GRAPH 3: Year-Long Monthly Thermal Yield & Solar Fraction
+        fig_perf = make_subplots(specs=[[{"secondary_y": True}]])
+        fig_perf.add_trace(go.Bar(x=df_analytics["Month"], y=df_analytics["Collector Yield (kWh/day)"], name="Thermal Yield (kWh)", marker_color="#0284c7"), secondary_y=False)
+        fig_perf.add_trace(go.Scatter(x=df_analytics["Month"], y=df_analytics["Solar Fraction (%)"], name="Solar Fraction (%)", mode="lines+markers", line=dict(color="#16a34a", width=2)), secondary_y=True)
+        fig_perf.update_layout(title="<b>3. Year-Long Seasonal Performance Profile</b>", plot_bgcolor="#ffffff", height=350, margin=dict(l=10, r=10, t=40, b=10), legend=dict(orientation="h", y=-0.2))
+        fig_perf.update_yaxes(title_text="Daily Yield (kWh)", secondary_y=False)
+        fig_perf.update_yaxes(title_text="Solar Fraction (%)", range=[0, 110], secondary_y=True)
+        st.plotly_chart(fig_perf, use_container_width=True, key='graph_seasonal_profile')
+
+    with g_row2_c2:
+        # GRAPH 4: Monthly Operational Cost Shield & Carbon Offsets
+        fig_save = make_subplots(specs=[[{"secondary_y": True}]])
+        fig_save.add_trace(go.Bar(x=df_analytics["Month"], y=df_analytics["Fuel Saved (Liters/month)"], name="Fuel Saved (L)", marker_color="#ea580c"), secondary_y=False)
+        fig_save.add_trace(go.Scatter(x=df_analytics["Month"], y=df_analytics["CO2 Mitigated (kg/month)"] / 1000.0, name="CO2 Abated (Tons)", mode="lines+markers", line=dict(color="#047857", width=2, dash="dash")), secondary_y=True)
+        fig_save.update_layout(title="<b>4. Fuel Displacement & Carbon Offset Tracker</b>", plot_bgcolor="#ffffff", height=350, margin=dict(l=10, r=10, t=40, b=10), legend=dict(orientation="h", y=-0.2))
+        fig_save.update_yaxes(title_text="Fuel Displaced (Liters)", secondary_y=False)
+        fig_save.update_yaxes(title_text="CO2 Mitigated (Metric Tons)", secondary_y=True)
+        st.plotly_chart(fig_save, use_container_width=True, key='graph_sustainability_profile')
+
+    # ROW 3: HORIZON PAYBACK TIMELINE
+    st.markdown("---")
+    # GRAPH 5: Long-Term Payback Horizon Curve
+    df_timeline_dash = generate_financial_timeline_dataframe(initial_investment=cost_dash, year_one_savings=savings_dash, lifecycle_years=15, discount_rate=0.08, fuel_escalation=0.06, opex_rate=0.015)
+    fig_dash_payback = go.Figure()
+    fig_dash_payback.add_shape(type="line", x0=0, y0=0, x1=15, y1=0, line=dict(color="#cbd5e1", width=2, dash="dash"))
+    fig_dash_payback.add_trace(go.Scatter(x=df_timeline_dash["Year"], y=df_timeline_dash["Cumulative Cash Position (₹)"], mode="lines+markers", name="Cumulative Cash Balance", line=dict(color="#16a34a", width=4, shape="spline"), marker=dict(size=8, color="#15803d")))
+    fig_dash_payback.update_layout(title="<b>5. Projected Return on Investment (Payback Horizon Curve)</b>", xaxis_title="Years in Operation", yaxis_title="Net Cumulative Cash Position (₹)", plot_bgcolor="#ffffff", height=350, margin=dict(l=10, r=10, t=40, b=10))
+    st.plotly_chart(fig_dash_payback, use_container_width=True, key='graph_payback_profile')
 
 # =====================================================
-# TAB 1: THERMAL ANALYSIS MODULE
+# RETAIN STANDARD BACKEND MODULE TABS
 # =====================================================
 with tabs[1]:
-    st.header("Advanced Thermal Analysis & Proposal Metrics")
-    st.markdown("---")
-    
-    if not df_analytics.empty:
-        total_annual_fuel_saved = float(df_analytics["Fuel Saved (Liters/month)"].sum())
-        total_annual_co2_saved = float(df_analytics["CO2 Mitigated (kg/month)"].sum())
-        average_solar_fraction = float(df_analytics["Solar Fraction (%)"].mean())
-    else:
-        total_annual_fuel_saved, total_annual_co2_saved, average_solar_fraction = 0.0, 0.0, 0.0
-
-    summary_col1, summary_col2, summary_col3 = st.columns(3)
-    summary_col1.metric("Total Fuel Displaced Annually", f"{total_annual_fuel_saved:,.0f} Liters / Year")
-    summary_col2.metric("Carbon Footprint Reduction", f"{(total_annual_co2_saved / 1000):,.1f} Metric Tons CO2")
-    summary_col3.metric("Average Solar Fraction", f"{average_solar_fraction:.1f} % Contribution")
-    st.markdown("---")
-
-    graph_col1, graph_col2 = st.columns(2)
-    
-    fig_perf = make_subplots(specs=[[{"secondary_y": True}]])
-    fig_perf.add_trace(go.Bar(x=df_analytics["Month"], y=df_analytics["Collector Yield (kWh/day)"], name="Daily Thermal Yield (kWh)", marker_color="#0284c7", opacity=0.85), secondary_y=False)
-    fig_perf.add_trace(go.Scatter(x=df_analytics["Month"], y=df_analytics["Solar Fraction (%)"], name="Solar Fraction (%)", mode="lines+markers", line=dict(color="#16a34a", width=3)), secondary_y=True)
-    fig_perf.update_layout(title="<b>Seasonal Energy Yield & Grid Independence Profile</b>", legend=dict(orientation="h", y=1.1, x=0.5, xanchor="center"), plot_bgcolor="#ffffff", height=400)
-    fig_perf.update_yaxes(title_text="Daily Yield (kWh)", secondary_y=False, gridcolor="#f1f5f9")
-    fig_perf.update_yaxes(title_text="Solar Fraction (%)", range=[0, 110], secondary_y=True, showgrid=False)
-
-    fig_save = make_subplots(specs=[[{"secondary_y": True}]])
-    fig_save.add_trace(go.Bar(x=df_analytics["Month"], y=df_analytics["Fuel Saved (Liters/month)"], name="Fossil Fuel Displaced (L)", marker_color="#ea580c", opacity=0.85), secondary_y=False)
-    fig_save.add_trace(go.Scatter(x=df_analytics["Month"], y=df_analytics["CO2 Mitigated (kg/month)"] / 1000.0, name="Carbon Footprint Abated (Tons)", mode="lines+markers", line=dict(color="#047857", width=3, dash="dash")), secondary_y=True)
-    fig_save.update_layout(title="<b>Monthly Operational Cost Shield & Carbon Offsets</b>", legend=dict(orientation="h", y=1.1, x=0.5, xanchor="center"), plot_bgcolor="#ffffff", height=400)
-    fig_save.update_yaxes(title_text="Fuel Saved (Liters)", secondary_y=False, gridcolor="#f1f5f9")
-    fig_save.update_yaxes(title_text="CO2 Saved (Metric Tons)", secondary_y=True, showgrid=False)
-    
-    with graph_col1: st.plotly_chart(fig_perf, use_container_width=True, key='proposal_seasonal_performance')
-    with graph_col2: st.plotly_chart(fig_save, use_container_width=True, key='proposal_financial_sustainability')
-
-    st.markdown("---")
-    st.subheader("Seasonal Performance Data Matrix")
+    st.header("Advanced Seasonal Matrix")
     st.dataframe(df_analytics, hide_index=True, use_container_width=True)
 
-# =====================================================
-# TAB 2: INDUSTRIAL SHADING & FIELD LAYOUT MATRIX
-# =====================================================
 with tabs[2]:
     st.header("Solar Field Layout Plan")
     col_ui1, col_ui2, col_ui3 = st.columns(3)
     with col_ui1: input_rows = st.number_input("Number of Rows Layout", min_value=1, max_value=20, value=int(calculated_rows))
-    with col_ui2: input_cols = st.number_input("Collectors per Row (Columns Layout)", min_value=1, max_value=50, value=int(calculated_cols))
+    with col_ui2: input_cols = st.number_input("Collectors per Row", min_value=1, max_value=50, value=int(calculated_cols))
     with col_ui3: selected_tilt = st.slider("Collector Frame Tilt Angle (°)", 0, 60, 30)
-
     winter_solstice_altitude = 90.0 - abs(latitude + 23.45)
     vertical_rise = collector_height * math.sin(math.radians(selected_tilt))
     panel_ground_footprint = collector_height * math.cos(math.radians(selected_tilt))
     min_shading_space = vertical_rise / math.tan(math.radians(winter_solstice_altitude))
     ideal_pitch_distance = panel_ground_footprint + min_shading_space + 0.5 
-
     fig_layout = draw_layout(rows=input_rows, cols=input_cols, width=collector_width, height=collector_height, pitch=ideal_pitch_distance, tilt=selected_tilt, latitude=latitude)
     st.pyplot(fig_layout)
 
-# =====================================================
-# TAB 3: SCHEMATIC P&ID ENGINE WIREFRAME
-# =====================================================
 with tabs[3]:
-    st.header("Industrial Piping & Instrumentation Diagram (P&ID)")
+    st.header("P&ID Engine Wiring Diagram")
     pid = generate_pid(industry=industry, collectors=collectors, tout=tout, daily_water=daily_water, total_flow=total_flow)
     st.graphviz_chart(pid)
 
-# =====================================================
-# TAB 4: ADVANCED INVESTMENT LIFECYCLE MODELING
-# =====================================================
 with tabs[4]:
-    st.header("Financial Performance Analysis & Modeling Parameters")
-    fin_col1, fin_col2, fin_col3 = st.columns(3)
-    with fin_col1: input_discount_rate = st.slider("Corporate Discount Rate (WACC %)", 4.0, 15.0, 8.5) / 100.0
-    with fin_col2: input_fuel_inflation = st.slider("Expected Annual Fuel Inflation (%)", 0.0, 12.0, 6.0) / 100.0
-    with fin_col3: input_maintenance_opex = st.slider("Annual Maintenance / OpEx (% of Capex)", 0.5, 5.0, 1.5) / 100.0
+    st.header("Financial Performance Analysis")
+    df_timeline = generate_financial_timeline_dataframe(cost_dash, savings_dash, 15, 0.08, 0.06, 0.015)
+    st.dataframe(df_timeline, hide_index=True, use_container_width=True)
 
-    calculated_investment = calculate_market_project_cost(total_area=total_area, collector_type=collector_type)
-    year_one_gross_savings = calculate_real_annual_savings(annual_energy_yield_kwh=annual_energy_yield_sum_kwh, fuel_cost_per_kwh=fuel_cost)
-    true_payback_period = calculate_dynamic_payback(calculated_investment, year_one_gross_savings, input_fuel_inflation, 0.01, input_maintenance_opex)
-    project_net_present_value = calculate_comprehensive_npv(calculated_investment, year_one_gross_savings, 20, input_discount_rate, input_fuel_inflation, 0.01, input_maintenance_opex)
-
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Total Capital Required (CapEx)", f"₹ {calculated_investment:,.0f}")
-    m2.metric("Year 1 Net Savings", f"₹ {year_one_gross_savings:,.0f}")
-    m3.metric("Dynamic Payback Period", f"{true_payback_period:.2f} Years")
-    m4.metric("Net Present Value (20-Yr NPV)", f"₹ {project_net_present_value:,.0f}")
-
-    df_timeline = generate_financial_timeline_dataframe(calculated_investment, year_one_gross_savings, 15, input_discount_rate, input_fuel_inflation, 0.01, input_maintenance_opex)
-    fig_payback_curve = go.Figure()
-    fig_payback_curve.add_shape(type="line", x0=0, y0=0, x1=15, y1=0, line=dict(color="#cbd5e1", width=2, dash="dash"))
-    fig_payback_curve.add_trace(go.Scatter(x=df_timeline["Year"], y=df_timeline["Cumulative Cash Position (₹)"], mode="lines+markers", line=dict(color="#10b981", width=4, shape="spline"), marker=dict(size=8)))
-    fig_payback_curve.update_layout(xaxis_title="Years in Operation", yaxis_title="Net Project Value (₹)", plot_bgcolor="#ffffff", height=400)
-    st.plotly_chart(fig_payback_curve, use_container_width=True, key='financial_tab_payback_render')
-
-# =====================================================
-# TAB 5: PROCESS INTEGRATION
-# =====================================================
 with tabs[5]:
     st.header("Real-Time System Integration Blueprint")
     integration_blueprint = render_dynamic_integration_ui(industry=industry, tout=tout, tinlet=tin, tambient=ambient, daily_water=daily_water, total_flow=total_flow, eta_0=eta0, a1=a1, a2=a2)
     st.html(integration_blueprint)
 
-# =====================================================
-# TAB 6: INSTALLATION WORKFLOW PROCEDURES
-# =====================================================
 with tabs[6]:
     st.header("Step-by-Step System Installation Guide")
-    flowchart_html = """
-    <div style="background-color: #f8fafc; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; margin-bottom: 25px;">
-        <span style="font-weight: bold; color: #0284c7;">1. Foundation Marking</span> ➔ 
-        <span style="font-weight: bold; color: #0284c7;">2. Structure Erection</span> ➔ 
-        <span style="font-weight: bold; color: #0284c7;">3. Collector Mounting</span> ➔ 
-        <span style="font-weight: bold; color: #0284c7;">4. Hydraulic Piping</span>
-        <br><br>
-        <span style="font-weight: bold; color: #16a34a;">7. Electrical Integration</span> 🮪 
-        <span style="font-weight: bold; color: #475569;">6. Insulation</span> 🮪 
-        <span style="font-weight: bold; color: #ea580c;">5. Pressure Testing</span>
-    </div>
-    """
-    st.html(flowchart_html)
-
     installation_data = installation_steps()
     for idx, item in enumerate(installation_data):
-        with st.container():
-            with st.expander(f"**Step {idx+1}: {item['icon']} {item['step']}**", expanded=(idx == 0)):
-                col_desc, col_checklist = st.columns([2, 1])
-                with col_desc:
-                    st.markdown("##### 📝 What we do:")
-                    st.write(item["description"])
-                    st.markdown("##### ✨ Why it matters:")
-                    st.info(item["specs"])
-                with col_checklist:
-                    st.markdown("##### 🔍 Quality Checks:")
-                    for check in item["checklist"]:
-                        st.checkbox(check, key=f"layman_install_chk_{idx}_{hash(check)}")
-        st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
+        with st.expander(f"**Step {idx+1}: {item['step']}**"):
+            st.write(item["description"])
 
-# =====================================================
-# TAB 7: LITERATURE SURVEY
-# =====================================================
 with tabs[7]:
-    st.header("Literature Survey & Engineering Standards Reference List")
-    refs = literature()
-    for r in refs:
-        st.write(f"- {r}")
+    st.header("Engineering Standards Reference List")
+    st.write(literature())
